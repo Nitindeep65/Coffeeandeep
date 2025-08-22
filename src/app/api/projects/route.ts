@@ -24,10 +24,28 @@ export async function POST(request: NextRequest) {
   try {
     await connectDB();
     
-    const body = await request.json();
+    const contentType = request.headers.get('content-type') || '';
+    let projectData: any;
+    
+    if (contentType.includes('application/json')) {
+      // Handle JSON data
+      projectData = await request.json();
+    } else {
+      // Handle FormData
+      const formData = await request.formData();
+      projectData = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        fullDescription: formData.get('fullDescription'),
+        technologies: formData.get('technologies'),
+        githubUrl: formData.get('githubUrl'),
+        liveUrl: formData.get('liveUrl'),
+        category: formData.get('category'),
+      };
+    }
     
     // Validate required fields
-    const { title, description, fullDescription, technologies, githubUrl, liveUrl, category } = body;
+    const { title, description, fullDescription, technologies, githubUrl, liveUrl, category } = projectData;
     
     if (!title || !description || !fullDescription || !technologies || !githubUrl || !liveUrl) {
       return NextResponse.json(
@@ -49,8 +67,8 @@ export async function POST(request: NextRequest) {
       githubUrl,
       liveUrl,
       category: category || 'Frontend',
-      imageUrl: body.imageUrl || null,
-      featured: body.featured || false
+      imageUrl: projectData.imageUrl || null,
+      featured: projectData.featured || false
     });
     
     const savedProject = await newProject.save();

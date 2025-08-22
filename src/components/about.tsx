@@ -234,13 +234,13 @@ const About = () => {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {stats.map((stat, index) => (
-                <div key={index} className="text-center p-6 bg-white dark:bg-zinc-900 rounded-xl border dark:border-zinc-800 shadow-sm">
-                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                <div key={index} className="text-center p-4 sm:p-6 bg-white dark:bg-zinc-900 rounded-xl border dark:border-zinc-800 shadow-sm">
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
                     {stat.number}
                   </div>
-                  <div className="text-gray-600 dark:text-zinc-400 text-sm font-medium">
+                  <div className="text-gray-600 dark:text-zinc-400 text-xs sm:text-sm font-medium">
                     {stat.label}
                   </div>
                 </div>
@@ -261,7 +261,7 @@ const About = () => {
                     {skillGroup.category}
                   </h4>
                   
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {skillGroup.items.map((skill, skillIndex) => (
                       <div 
                         key={skillIndex}

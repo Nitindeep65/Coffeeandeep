@@ -174,20 +174,38 @@ const AllProjects = () => {
 
         {/* Projects Grid - Show all projects */}
         {!loading && !error && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {projects.map((project) => (
+          <>
+            {projects.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-600 dark:text-zinc-400 mb-4">No projects found.</p>
+                {process.env.NODE_ENV === 'development' && (
+                  <button 
+                    onClick={() => fetch('/api/seed', { method: 'POST' }).then(() => window.location.reload())}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+                  >
+                    Seed Database
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
+                {projects.map((project) => (
               <div
                 key={project._id || project.id}
                 className="group bg-gray-50 dark:bg-zinc-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border dark:border-zinc-800"
               >
               {/* Project Image */}
               <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center overflow-hidden">
-                {project.imageUrl && project.imageUrl.startsWith('data:') ? (
-                  // User uploaded image
+                {project.imageUrl ? (
+                  // Project image exists
                   <img 
                     src={project.imageUrl} 
                     alt={project.title}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // If image fails to load, hide it and show placeholder
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
                   />
                 ) : (
                   // Placeholder for project image
@@ -224,7 +242,7 @@ const AllProjects = () => {
 
                 {/* Technologies */}
                 <div className="flex flex-wrap gap-1 mb-4">
-                  {project.technologies.slice(0, 3).map((tech) => (
+                  {(project.technologies || []).slice(0, 3).map((tech) => (
                     <span
                       key={tech}
                       className="text-xs bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 px-2 py-1 rounded"
@@ -232,20 +250,20 @@ const AllProjects = () => {
                       {tech}
                     </span>
                   ))}
-                  {project.technologies.length > 3 && (
+                  {(project.technologies || []).length > 3 && (
                     <span className="text-xs text-gray-500 dark:text-zinc-500">
-                      +{project.technologies.length - 3} more
+                      +{(project.technologies || []).length - 3} more
                     </span>
                   )}
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <a
                     href={project.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 bg-gray-900 dark:bg-zinc-700 text-white text-center py-2 rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-zinc-600 transition-colors duration-200"
+                    className="flex-1 bg-gray-900 dark:bg-zinc-700 text-white text-center py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-zinc-600 transition-colors duration-200"
                   >
                     GitHub
                   </a>
@@ -253,7 +271,7 @@ const AllProjects = () => {
                     href={project.liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 bg-blue-600 text-white text-center py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200"
+                    className="flex-1 bg-blue-600 text-white text-center py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200"
                   >
                     Live Demo
                   </a>
@@ -261,7 +279,9 @@ const AllProjects = () => {
               </div>
             </div>
           ))}
-          </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Add More Projects Button - Only in Development */}

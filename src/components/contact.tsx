@@ -120,7 +120,7 @@ const Contact = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
           
           {/* Contact Information */}
           <div className="space-y-8">
@@ -203,7 +203,7 @@ const Contact = () => {
             
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name and Email */}
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
                     Your Name *

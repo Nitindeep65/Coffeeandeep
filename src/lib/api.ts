@@ -53,45 +53,59 @@ class ApiService {
   }
 
   async createProject(projectData: any, imageFile?: File) {
-    const formData = new FormData();
-    
-    Object.keys(projectData).forEach(key => {
-      if (key === 'technologies' && Array.isArray(projectData[key])) {
-        formData.append(key, projectData[key].join(', '));
-      } else {
-        formData.append(key, projectData[key]);
-      }
-    });
-    
     if (imageFile) {
+      // Send as FormData when there's an image
+      const formData = new FormData();
+      
+      Object.keys(projectData).forEach(key => {
+        if (key === 'technologies' && Array.isArray(projectData[key])) {
+          formData.append(key, projectData[key].join(', '));
+        } else {
+          formData.append(key, projectData[key]);
+        }
+      });
+      
       formData.append('image', imageFile);
-    }
 
-    return this.request('/projects', {
-      method: 'POST',
-      body: formData,
-    });
+      return this.request('/projects', {
+        method: 'POST',
+        body: formData,
+      });
+    } else {
+      // Send as JSON when there's no image
+      return this.request('/projects', {
+        method: 'POST',
+        body: JSON.stringify(projectData),
+      });
+    }
   }
 
   async updateProject(id: string, projectData: any, imageFile?: File) {
-    const formData = new FormData();
-    
-    Object.keys(projectData).forEach(key => {
-      if (key === 'technologies' && Array.isArray(projectData[key])) {
-        formData.append(key, projectData[key].join(', '));
-      } else {
-        formData.append(key, projectData[key]);
-      }
-    });
-    
     if (imageFile) {
+      // Send as FormData when there's an image
+      const formData = new FormData();
+      
+      Object.keys(projectData).forEach(key => {
+        if (key === 'technologies' && Array.isArray(projectData[key])) {
+          formData.append(key, projectData[key].join(', '));
+        } else {
+          formData.append(key, projectData[key]);
+        }
+      });
+      
       formData.append('image', imageFile);
-    }
 
-    return this.request(`/projects/${id}`, {
-      method: 'PUT',
-      body: formData,
-    });
+      return this.request(`/projects/${id}`, {
+        method: 'PUT',
+        body: formData,
+      });
+    } else {
+      // Send as JSON when there's no image
+      return this.request(`/projects/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(projectData),
+      });
+    }
   }
 
   async deleteProject(id: string) {
