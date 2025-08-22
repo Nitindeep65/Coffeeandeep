@@ -21,6 +21,8 @@ interface Project {
 const Projects = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +90,38 @@ const Projects = () => {
     });
   };
 
+  const openEditForm = (project: Project) => {
+    setEditingProject(project);
+    setNewProject({
+      title: project.title,
+      description: project.description,
+      fullDescription: project.fullDescription,
+      technologies: Array.isArray(project.technologies) ? project.technologies.join(', ') : '',
+      githubUrl: project.githubUrl,
+      liveUrl: project.liveUrl,
+      category: project.category,
+      imageFile: null,
+      imagePreview: ''
+    });
+    setShowEditForm(true);
+  };
+
+  const closeEditForm = () => {
+    setShowEditForm(false);
+    setEditingProject(null);
+    setNewProject({
+      title: '',
+      description: '',
+      fullDescription: '',
+      technologies: '',
+      githubUrl: '',
+      liveUrl: '',
+      category: 'Frontend',
+      imageFile: null,
+      imagePreview: ''
+    });
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setNewProject(prev => ({
@@ -133,9 +167,39 @@ const Projects = () => {
         category: newProject.category
       };
 
-      const savedProject = await apiService.createProject(projectData, newProject.imageFile || undefined);
-      setProjects(prev => [...prev, savedProject]);
-      closeAddForm();
+      if (editingProject) {
+        // Update existing project
+        const formData = new FormData();
+        formData.append('title', newProject.title);
+        formData.append('description', newProject.description);
+        formData.append('fullDescription', newProject.fullDescription);
+        formData.append('technologies', newProject.technologies);
+        formData.append('githubUrl', newProject.githubUrl);
+        formData.append('liveUrl', newProject.liveUrl);
+        formData.append('category', newProject.category);
+        
+        if (newProject.imageFile) {
+          formData.append('image', newProject.imageFile);
+        }
+
+        const response = await fetch(`/api/projects/${editingProject._id}`, {
+          method: 'PUT',
+          body: formData,
+        });
+
+        if (response.ok) {
+          const updatedProject = await response.json();
+          setProjects(prev => prev.map(p => p._id === editingProject._id ? updatedProject : p));
+          closeEditForm();
+        } else {
+          throw new Error('Failed to update project');
+        }
+      } else {
+        // Create new project
+        const savedProject = await apiService.createProject(projectData, newProject.imageFile || undefined);
+        setProjects(prev => [...prev, savedProject]);
+        closeAddForm();
+      }
       
       // Reset form
       setNewProject({
@@ -150,8 +214,8 @@ const Projects = () => {
         imagePreview: ''
       });
     } catch (error) {
-      console.error('Error adding project:', error);
-      alert('Failed to add project. Please try again.');
+      console.error('Error handling project:', error);
+      alert(`Failed to ${editingProject ? 'update' : 'add'} project. Please try again.`);
     }
   };
 
@@ -191,32 +255,44 @@ const Projects = () => {
               <div className="text-center py-12">
                 <p className="text-gray-600 dark:text-zinc-400 mb-4">No projects found.</p>
                 {process.env.NODE_ENV === 'development' && (
-                  <button 
-                    onClick={() => fetch('/api/seed', { method: 'POST' }).then(() => window.location.reload())}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-                  >
-                    Seed Database
-                  </button>
+                  <div className="space-y-2">
+                    <button 
+                      onClick={() => fetch('/api/seed', { method: 'POST' }).then(() => window.location.reload())}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg mr-2"
+                    >
+                      Seed Database
+                    </button>
+                    <button 
+                      onClick={() => fetch('/api/fix-images', { method: 'POST' }).then(() => window.location.reload())}
+                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg"
+                    >
+                      Fix Missing Images
+                    </button>
+                  </div>
                 )}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
                 {projects.slice(0, 3).map((project) => (
-              <div
-                key={project._id || project.id}
-                className="group bg-gray-50 dark:bg-zinc-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border dark:border-zinc-800"
-              >
+                  <div
+                    key={project._id || project.id}
+                    className="group bg-gray-50 dark:bg-zinc-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border dark:border-zinc-800"
+                  >
               {/* Project Image */}
               <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center overflow-hidden">
                 {project.imageUrl ? (
-                  // Project image exists  
+                  // Project image exists - using regular img temporarily for debugging
                   <img 
                     src={project.imageUrl} 
                     alt={project.title}
                     className="w-full h-full object-cover"
                     onError={(e) => {
+                      console.error(`Failed to load image: ${project.imageUrl}`);
                       // If image fails to load, hide it and show placeholder
                       (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                    onLoad={() => {
+                      console.log(`Successfully loaded image: ${project.imageUrl}`);
                     }}
                   />
                 ) : (
@@ -228,6 +304,7 @@ const Projects = () => {
                       </svg>
                     </div>
                     <p className="text-sm opacity-80">Project Image</p>
+                    <p className="text-xs opacity-60">URL: {project.imageUrl || 'No URL'}</p>
                   </div>
                 )}
                 
@@ -287,10 +364,19 @@ const Projects = () => {
                   >
                     Live Demo
                   </a>
+                  {/* Edit Button - Only in Development */}
+                  {process.env.NODE_ENV === 'development' && (
+                    <button
+                      onClick={() => openEditForm(project)}
+                      className="flex-1 bg-purple-600 text-white text-center py-2 px-4 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors duration-200"
+                    >
+                      Edit
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
-          ))}
+                ))}
               </div>
             )}
           </>
@@ -313,12 +399,21 @@ const Projects = () => {
 
         {/* Add More Projects Button - Only in Development */}
         {process.env.NODE_ENV === 'development' && (
-          <div className="text-center">
+          <div className="text-center space-y-4">
             <button 
               onClick={openAddForm}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl mr-4"
             >
               + Add New Project
+            </button>
+            <button 
+              onClick={() => fetch('/api/fix-images', { method: 'POST' }).then(() => {
+                alert('Images updated! Refreshing page...');
+                window.location.reload();
+              })}
+              className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              🔧 Fix Missing Images
             </button>
           </div>
         )}
@@ -331,11 +426,14 @@ const Projects = () => {
               <div className="relative">
                 <div className="h-64 bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center overflow-hidden">
                   {selectedProject.imageUrl ? (
-                    // Project image exists
+                    // Project image exists - using regular img temporarily for debugging
                     <img 
                       src={selectedProject.imageUrl} 
                       alt={selectedProject.title}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error(`Modal: Failed to load image: ${selectedProject.imageUrl}`);
+                      }}
                     />
                   ) : (
                     // Placeholder
@@ -626,6 +724,219 @@ const Projects = () => {
                     className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
                   >
                     Add Project
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Project Form Modal - Only in Development */}
+        {process.env.NODE_ENV === 'development' && showEditForm && editingProject && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              {/* Form Header */}
+              <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 rounded-t-2xl">
+                <h3 className="text-2xl font-bold text-white mb-2">Edit Project</h3>
+                <p className="text-purple-100">Update your project details</p>
+                
+                <button
+                  onClick={closeEditForm}
+                  className="absolute top-4 right-4 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors duration-200"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Form Content */}
+              <form onSubmit={handleAddProject} className="p-6 space-y-6">
+                {/* Project Title */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                    Project Title *
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={newProject.title}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                    placeholder="Enter project title"
+                  />
+                </div>
+
+                {/* Short Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                    Short Description *
+                  </label>
+                  <textarea
+                    name="description"
+                    value={newProject.description}
+                    onChange={handleInputChange}
+                    required
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white resize-none"
+                    placeholder="Brief description for the card view"
+                  />
+                </div>
+
+                {/* Full Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                    Full Description *
+                  </label>
+                  <textarea
+                    name="fullDescription"
+                    value={newProject.fullDescription}
+                    onChange={handleInputChange}
+                    required
+                    rows={4}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white resize-none"
+                    placeholder="Detailed description for the modal view"
+                  />
+                </div>
+
+                {/* Technologies */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                    Technologies *
+                  </label>
+                  <input
+                    type="text"
+                    name="technologies"
+                    value={newProject.technologies}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                    placeholder="React, Node.js, MongoDB (comma separated)"
+                  />
+                  <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">
+                    Separate technologies with commas
+                  </p>
+                </div>
+
+                {/* Category */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                    Category *
+                  </label>
+                  <select
+                    name="category"
+                    value={newProject.category}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                  >
+                    <option value="Frontend">Frontend</option>
+                    <option value="Backend">Backend</option>
+                    <option value="Full Stack">Full Stack</option>
+                    <option value="Mobile">Mobile</option>
+                    <option value="AI/ML">AI/ML</option>
+                    <option value="DevOps">DevOps</option>
+                  </select>
+                </div>
+
+                {/* Project Image */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                    Project Image
+                  </label>
+                  
+                  {/* Current Image Preview */}
+                  {editingProject.imageUrl && !newProject.imagePreview && (
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-600 dark:text-zinc-400 mb-2">Current image:</p>
+                      <img 
+                        src={editingProject.imageUrl} 
+                        alt="Current project" 
+                        className="w-32 h-24 object-cover rounded-lg border"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* New Image Preview */}
+                  {newProject.imagePreview && (
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-600 dark:text-zinc-400 mb-2">New image:</p>
+                      <div className="relative inline-block">
+                        <img 
+                          src={newProject.imagePreview} 
+                          alt="Preview" 
+                          className="w-32 h-24 object-cover rounded-lg border"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                  />
+                  <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">
+                    Upload a new image to replace the current one (optional)
+                  </p>
+                </div>
+
+                {/* URLs */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                      GitHub URL *
+                    </label>
+                    <input
+                      type="url"
+                      name="githubUrl"
+                      value={newProject.githubUrl}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                      placeholder="https://github.com/username/repo"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                      Live Demo URL *
+                    </label>
+                    <input
+                      type="url"
+                      name="liveUrl"
+                      value={newProject.liveUrl}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                      placeholder="https://yourproject.com"
+                    />
+                  </div>
+                </div>
+
+                {/* Form Actions */}
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={closeEditForm}
+                    className="flex-1 bg-gray-200 dark:bg-zinc-700 text-gray-800 dark:text-zinc-200 py-3 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-zinc-600 transition-colors duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-200"
+                  >
+                    Update Project
                   </button>
                 </div>
               </form>

@@ -1,38 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { apiService } from '@/lib/api';
+
+interface Experience {
+  _id?: string;
+  id?: number;
+  title: string;
+  company: string;
+  duration: string;
+  location: string;
+  description: string;
+  technologies: string[];
+  current?: boolean;
+  startDate?: Date;
+  endDate?: Date;
+}
 
 const About = () => {
   const [showAddExperienceForm, setShowAddExperienceForm] = useState(false);
-  const [experiences, setExperiences] = useState([
-    {
-      id: 1,
-      title: "Senior Full Stack Developer",
-      company: "Tech Solutions Inc.",
-      duration: "2022 - Present",
-      location: "Remote",
-      description: "Led development of scalable web applications using React, Node.js, and cloud technologies. Mentored junior developers and collaborated with cross-functional teams to deliver high-quality solutions.",
-      technologies: ["React", "Node.js", "AWS", "MongoDB", "TypeScript"]
-    },
-    {
-      id: 2,
-      title: "Frontend Developer",
-      company: "Digital Agency Pro",
-      duration: "2021 - 2022",
-      location: "New York, NY",
-      description: "Developed responsive web applications and improved user experience across multiple client projects. Collaborated with designers to implement pixel-perfect interfaces.",
-      technologies: ["React", "JavaScript", "CSS3", "Figma", "Git"]
-    },
-    {
-      id: 3,
-      title: "Junior Web Developer",
-      company: "StartUp Ventures",
-      duration: "2020 - 2021",
-      location: "San Francisco, CA",
-      description: "Built and maintained company websites, learned modern development practices, and contributed to the development of internal tools and dashboards.",
-      technologies: ["HTML5", "CSS3", "JavaScript", "PHP", "MySQL"]
-    }
-  ]);
+  const [showEditExperienceForm, setShowEditExperienceForm] = useState(false);
+  const [editingExperience, setEditingExperience] = useState<Experience | null>(null);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [newExperience, setNewExperience] = useState({
     title: '',
@@ -40,8 +31,31 @@ const About = () => {
     duration: '',
     location: '',
     description: '',
-    technologies: ''
+    technologies: '',
+    current: false,
+    startDate: '',
+    endDate: ''
   });
+
+  // Fetch experiences from API
+  useEffect(() => {
+    const fetchExperiences = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getExperience();
+        console.log('Experiences data received:', data);
+        setExperiences(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching experiences:', err);
+        setError('Failed to load experiences');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExperiences();
+  }, []);
 
   const handleSmoothScroll = (targetId: string) => {
     const element = document.getElementById(targetId);
@@ -55,41 +69,102 @@ const About = () => {
     }
   };
 
-  const handleExperienceInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+  const handleExperienceInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
     setNewExperience(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }));
   };
 
-  const handleAddExperience = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const experience = {
-      id: experiences.length + 1,
-      title: newExperience.title,
-      company: newExperience.company,
-      duration: newExperience.duration,
-      location: newExperience.location,
-      description: newExperience.description,
-      technologies: newExperience.technologies.split(',').map(tech => tech.trim())
-    };
+  const openEditExperienceForm = (experience: Experience) => {
+    setEditingExperience(experience);
+    setNewExperience({
+      title: experience.title,
+      company: experience.company,
+      duration: experience.duration,
+      location: experience.location,
+      description: experience.description,
+      technologies: Array.isArray(experience.technologies) ? experience.technologies.join(', ') : '',
+      current: experience.current || false,
+      startDate: experience.startDate ? new Date(experience.startDate).toISOString().split('T')[0] : '',
+      endDate: experience.endDate ? new Date(experience.endDate).toISOString().split('T')[0] : ''
+    });
+    setShowEditExperienceForm(true);
+  };
 
-    setExperiences(prev => [experience, ...prev]);
+  const closeEditExperienceForm = () => {
+    setShowEditExperienceForm(false);
+    setEditingExperience(null);
     setNewExperience({
       title: '',
       company: '',
       duration: '',
       location: '',
       description: '',
-      technologies: ''
+      technologies: '',
+      current: false,
+      startDate: '',
+      endDate: ''
     });
-    setShowAddExperienceForm(false);
   };
 
-  const deleteExperience = (id: number) => {
-    setExperiences(prev => prev.filter(exp => exp.id !== id));
+  const handleAddExperience = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const experienceData = {
+        title: newExperience.title,
+        company: newExperience.company,
+        duration: newExperience.duration,
+        location: newExperience.location,
+        description: newExperience.description,
+        technologies: newExperience.technologies.split(',').map(tech => tech.trim()),
+        current: newExperience.current,
+        startDate: newExperience.startDate ? new Date(newExperience.startDate) : new Date(),
+        endDate: newExperience.endDate ? new Date(newExperience.endDate) : undefined
+      };
+
+      if (editingExperience) {
+        // Update existing experience
+        const updatedExperience = await apiService.updateExperience(editingExperience._id!, experienceData);
+        setExperiences(prev => prev.map(exp => exp._id === editingExperience._id ? updatedExperience.experience : exp));
+        closeEditExperienceForm();
+      } else {
+        // Create new experience
+        const savedExperience = await apiService.createExperience(experienceData);
+        setExperiences(prev => [savedExperience.experience, ...prev]);
+        setNewExperience({
+          title: '',
+          company: '',
+          duration: '',
+          location: '',
+          description: '',
+          technologies: '',
+          current: false,
+          startDate: '',
+          endDate: ''
+        });
+        setShowAddExperienceForm(false);
+      }
+    } catch (error) {
+      console.error('Error handling experience:', error);
+      alert(`Failed to ${editingExperience ? 'update' : 'add'} experience. Please try again.`);
+    }
+  };
+
+  const deleteExperience = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this experience?')) {
+      return;
+    }
+
+    try {
+      await apiService.deleteExperience(id);
+      setExperiences(prev => prev.filter(exp => exp._id !== id));
+    } catch (error) {
+      console.error('Error deleting experience:', error);
+      alert('Failed to delete experience. Please try again.');
+    }
   };
 
   const skills = [
@@ -137,70 +212,104 @@ const About = () => {
           </div>
 
           {/* Experience Timeline */}
-          <div className="space-y-8">
-            {experiences.map((experience, index) => (
-              <div key={experience.id} className="relative">
-                {/* Timeline line */}
-                {index !== experiences.length - 1 && (
-                  <div className="absolute left-4 top-12 w-0.5 h-full bg-gray-200 dark:bg-zinc-700"></div>
-                )}
-                
-                <div className="flex gap-6">
-                  {/* Timeline dot */}
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mt-2">
-                    <div className="w-3 h-3 bg-white rounded-full"></div>
-                  </div>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="text-gray-600 dark:text-zinc-400 mt-4">Loading experiences...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-600 dark:text-red-400">{error}</p>
+            </div>
+          ) : experiences.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600 dark:text-zinc-400 mb-4">No work experience found.</p>
+              {process.env.NODE_ENV === 'development' && (
+                <button 
+                  onClick={() => fetch('/api/seed', { method: 'POST' }).then(() => window.location.reload())}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+                >
+                  Seed Database
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {experiences.map((experience, index) => (
+                <div key={experience._id || experience.id} className="relative">
+                  {/* Timeline line */}
+                  {index !== experiences.length - 1 && (
+                    <div className="absolute left-4 top-12 w-0.5 h-full bg-gray-200 dark:bg-zinc-700"></div>
+                  )}
                   
-                  {/* Experience content */}
-                  <div className="flex-1 bg-white dark:bg-zinc-900 rounded-xl p-6 border dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow duration-200">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                          {experience.title}
-                        </h4>
-                        <div className="flex flex-wrap items-center gap-4 text-gray-600 dark:text-zinc-400 text-sm">
-                          <span className="font-medium text-blue-600 dark:text-blue-400">
-                            {experience.company}
-                          </span>
-                          <span>{experience.duration}</span>
-                          <span>{experience.location}</span>
-                        </div>
-                      </div>
-                      
-                      {/* Delete button - Only in Development */}
-                      {process.env.NODE_ENV === 'development' && (
-                        <button
-                          onClick={() => deleteExperience(experience.id)}
-                          className="text-red-500 hover:text-red-700 p-1 rounded transition-colors duration-200"
-                          title="Delete experience"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      )}
+                  <div className="flex gap-6">
+                    {/* Timeline dot */}
+                    <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mt-2">
+                      <div className="w-3 h-3 bg-white rounded-full"></div>
                     </div>
                     
-                    <p className="text-gray-700 dark:text-zinc-300 leading-relaxed mb-4">
-                      {experience.description}
-                    </p>
-                    
-                    {/* Technologies used */}
-                    <div className="flex flex-wrap gap-2">
-                      {experience.technologies.map((tech, techIndex) => (
-                        <span
-                          key={techIndex}
-                          className="text-xs bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 px-3 py-1 rounded-full font-medium"
-                        >
-                          {tech}
-                        </span>
-                      ))}
+                    {/* Experience content */}
+                    <div className="flex-1 bg-white dark:bg-zinc-900 rounded-xl p-6 border dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow duration-200">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                            {experience.title}
+                          </h4>
+                          <div className="flex flex-wrap items-center gap-4 text-gray-600 dark:text-zinc-400 text-sm">
+                            <span className="font-medium text-blue-600 dark:text-blue-400">
+                              {experience.company}
+                            </span>
+                            <span>{experience.duration}</span>
+                            <span>{experience.location}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Action buttons - Only in Development */}
+                        {process.env.NODE_ENV === 'development' && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => openEditExperienceForm(experience)}
+                              className="text-blue-500 hover:text-blue-700 p-1 rounded transition-colors duration-200"
+                              title="Edit experience"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => deleteExperience(experience._id!)}
+                              className="text-red-500 hover:text-red-700 p-1 rounded transition-colors duration-200"
+                              title="Delete experience"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <p className="text-gray-700 dark:text-zinc-300 mb-4 leading-relaxed">
+                        {experience.description}
+                      </p>
+
+                      {/* Technologies */}
+                      <div className="flex flex-wrap gap-2">
+                        {(experience.technologies || []).map((tech, techIndex) => (
+                          <span
+                            key={techIndex}
+                            className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full font-medium"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="grid lg:grid-cols-2 gap-16 items-start mt-20">
@@ -366,6 +475,21 @@ const About = () => {
                   </div>
                 </div>
 
+                {/* Current Job Checkbox */}
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="current-add"
+                    name="current"
+                    checked={newExperience.current}
+                    onChange={handleExperienceInputChange}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <label htmlFor="current-add" className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                    This is my current job
+                  </label>
+                </div>
+
                 {/* Description */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
@@ -377,7 +501,7 @@ const About = () => {
                     onChange={handleExperienceInputChange}
                     required
                     rows={4}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white resize-none"
                     placeholder="Describe your role, responsibilities, and achievements..."
                   />
                 </div>
@@ -401,6 +525,38 @@ const About = () => {
                   </p>
                 </div>
 
+                {/* Start and End Dates */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                      Start Date *
+                    </label>
+                    <input
+                      type="date"
+                      name="startDate"
+                      value={newExperience.startDate}
+                      onChange={handleExperienceInputChange}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                    />
+                  </div>
+
+                  {!newExperience.current && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                        End Date
+                      </label>
+                      <input
+                        type="date"
+                        name="endDate"
+                        value={newExperience.endDate}
+                        onChange={handleExperienceInputChange}
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 {/* Form Actions */}
                 <div className="flex gap-4 pt-4">
                   <button
@@ -415,6 +571,195 @@ const About = () => {
                     className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
                   >
                     Add Experience
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Experience Form Modal - Only in Development */}
+        {process.env.NODE_ENV === 'development' && showEditExperienceForm && editingExperience && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              {/* Form Header */}
+              <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 rounded-t-2xl">
+                <h3 className="text-2xl font-bold text-white mb-2">Edit Experience</h3>
+                <p className="text-purple-100">Update your work experience details</p>
+                
+                <button
+                  onClick={closeEditExperienceForm}
+                  className="absolute top-4 right-4 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors duration-200"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Form Content */}
+              <form onSubmit={handleAddExperience} className="p-6 space-y-6">
+                {/* Job Title */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                    Job Title *
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={newExperience.title}
+                    onChange={handleExperienceInputChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                    placeholder="Enter your job title"
+                  />
+                </div>
+
+                {/* Company Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                    Company Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="company"
+                    value={newExperience.company}
+                    onChange={handleExperienceInputChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                    placeholder="Enter company name"
+                  />
+                </div>
+
+                {/* Duration and Location */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                      Duration *
+                    </label>
+                    <input
+                      type="text"
+                      name="duration"
+                      value={newExperience.duration}
+                      onChange={handleExperienceInputChange}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                      placeholder="e.g., 2022 - Present"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                      Location *
+                    </label>
+                    <input
+                      type="text"
+                      name="location"
+                      value={newExperience.location}
+                      onChange={handleExperienceInputChange}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                      placeholder="e.g., Remote, New York, NY"
+                    />
+                  </div>
+                </div>
+
+                {/* Current Job Checkbox */}
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="current"
+                    name="current"
+                    checked={newExperience.current}
+                    onChange={handleExperienceInputChange}
+                    className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <label htmlFor="current" className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                    This is my current job
+                  </label>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                    Job Description *
+                  </label>
+                  <textarea
+                    name="description"
+                    value={newExperience.description}
+                    onChange={handleExperienceInputChange}
+                    required
+                    rows={4}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white resize-none"
+                    placeholder="Describe your role, responsibilities, and achievements..."
+                  />
+                </div>
+
+                {/* Technologies */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                    Technologies Used *
+                  </label>
+                  <input
+                    type="text"
+                    name="technologies"
+                    value={newExperience.technologies}
+                    onChange={handleExperienceInputChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                    placeholder="React, Node.js, MongoDB (comma separated)"
+                  />
+                  <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">
+                    Separate technologies with commas
+                  </p>
+                </div>
+
+                {/* Start and End Dates */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                      Start Date *
+                    </label>
+                    <input
+                      type="date"
+                      name="startDate"
+                      value={newExperience.startDate}
+                      onChange={handleExperienceInputChange}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                    />
+                  </div>
+
+                  {!newExperience.current && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                        End Date
+                      </label>
+                      <input
+                        type="date"
+                        name="endDate"
+                        value={newExperience.endDate}
+                        onChange={handleExperienceInputChange}
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Form Actions */}
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={closeEditExperienceForm}
+                    className="flex-1 bg-gray-200 dark:bg-zinc-700 text-gray-800 dark:text-zinc-200 py-3 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-zinc-600 transition-colors duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-200"
+                  >
+                    Update Experience
                   </button>
                 </div>
               </form>
