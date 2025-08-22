@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb/connect';
 import Experience from '@/lib/mongodb/models/Experience';
 import mongoose from 'mongoose';
 
+// Updated for Next.js 15 compatibility
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
