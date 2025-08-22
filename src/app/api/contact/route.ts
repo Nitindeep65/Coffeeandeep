@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb/connect';
 import Contact from '@/lib/mongodb/models/Contact';
+import nodemailer from 'nodemailer';
+
+// Create email transporter
+const createTransporter = () => {
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.SMTP_EMAIL,
+      pass: process.env.SMTP_PASSWORD,
+    },
+  });
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,10 +55,50 @@ export async function POST(request: NextRequest) {
       timestamp: savedContact.createdAt
     });
     
-    // Here you would typically:
-    // 1. Send an email using a service like SendGrid, Resend, or Nodemailer
-    // 2. Send auto-reply to the sender
-    // 3. Send notification to your email
+    // Send email notification
+    try {
+      const transporter = createTransporter();
+      
+      // Send notification to you
+      await transporter.sendMail({
+        from: process.env.SMTP_EMAIL,
+        to: process.env.SMTP_EMAIL,
+        subject: `Portfolio Contact: ${subject}`,
+        html: `
+          <h2>New Contact Form Submission</h2>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Subject:</strong> ${subject}</p>
+          <p><strong>Message:</strong></p>
+          <p>${message.replace(/\n/g, '<br>')}</p>
+          <hr>
+          <p><small>Submitted at: ${new Date().toLocaleString()}</small></p>
+        `,
+      });
+      
+      // Send auto-reply to the sender
+      await transporter.sendMail({
+        from: process.env.SMTP_EMAIL,
+        to: email,
+        subject: 'Thank you for contacting me!',
+        html: `
+          <h2>Thank you for reaching out!</h2>
+          <p>Hi ${name},</p>
+          <p>Thank you for your message. I've received your inquiry about "${subject}" and will get back to you as soon as possible.</p>
+          <p>Your message:</p>
+          <blockquote style="border-left: 4px solid #ccc; padding-left: 16px; margin: 16px 0;">
+            ${message.replace(/\n/g, '<br>')}
+          </blockquote>
+          <p>I typically respond within 24 hours.</p>
+          <p>Best regards,<br>Nitindeep Singh</p>
+        `,
+      });
+      
+      console.log('Emails sent successfully');
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      // Don't fail the request if email fails - the contact is still saved
+    }
     
     return NextResponse.json({
       message: 'Message sent successfully',
