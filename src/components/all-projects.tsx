@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { apiService } from '@/lib/api';
 
 interface Project {
-  id: number;
+  _id?: string;
+  id?: number;
   title: string;
   description: string;
   fullDescription: string;
@@ -19,41 +21,28 @@ interface Project {
 const AllProjects = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([
-    {
-      id: 1,
-      title: "E-Commerce Platform",
-      description: "A full-stack e-commerce solution with modern UI and secure payments.",
-      fullDescription: "Built a comprehensive e-commerce platform using Next.js and TypeScript. Features include user authentication, product catalog, shopping cart, secure checkout with Stripe integration, order management, and admin dashboard. Implemented responsive design with Tailwind CSS and used MongoDB for data storage.",
-      technologies: ["Next.js", "TypeScript", "MongoDB", "Stripe", "Tailwind CSS"],
-      githubUrl: "https://github.com/yourusername/ecommerce",
-      liveUrl: "https://yourproject.com",
-      imageUrl: "/project1.jpg",
-      category: "Full Stack"
-    },
-    {
-      id: 2,
-      title: "Task Management App",
-      description: "Collaborative task management tool with real-time updates.",
-      fullDescription: "Developed a collaborative task management application with real-time synchronization. Features drag-and-drop task boards, team collaboration, deadline tracking, file attachments, and notifications. Built with React, Node.js, and Socket.io for real-time functionality.",
-      technologies: ["React", "Node.js", "Socket.io", "PostgreSQL", "Material-UI"],
-      githubUrl: "https://github.com/yourusername/taskmanager",
-      liveUrl: "https://yourtaskapp.com",
-      imageUrl: "/project2.jpg",
-      category: "Frontend"
-    },
-    {
-      id: 3,
-      title: "Weather Dashboard",
-      description: "Beautiful weather app with location-based forecasts and analytics.",
-      fullDescription: "Created a comprehensive weather dashboard that provides detailed weather information, forecasts, and analytics. Features include location-based weather, 7-day forecasts, weather maps, historical data, and personalized recommendations. Integrated with multiple weather APIs for accurate data.",
-      technologies: ["Vue.js", "Python", "FastAPI", "Chart.js", "OpenWeather API"],
-      githubUrl: "https://github.com/yourusername/weather",
-      liveUrl: "https://yourweather.com",
-      imageUrl: "/project3.jpg",
-      category: "Frontend"
-    }
-  ]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch projects from API
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getProjects();
+        setProjects(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        setError('Failed to load projects');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const [newProject, setNewProject] = useState({
     title: '',
@@ -168,13 +157,29 @@ const AllProjects = () => {
           </p>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="text-gray-600 dark:text-zinc-400 mt-4">Loading projects...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-red-600 dark:text-red-400">{error}</p>
+          </div>
+        )}
+
         {/* Projects Grid - Show all projects */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {projects.map((project) => (
-            <div
-              key={project.id}
-              className="group bg-gray-50 dark:bg-zinc-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border dark:border-zinc-800"
-            >
+        {!loading && !error && (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {projects.map((project) => (
+              <div
+                key={project._id || project.id}
+                className="group bg-gray-50 dark:bg-zinc-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border dark:border-zinc-800"
+              >
               {/* Project Image */}
               <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center overflow-hidden">
                 {project.imageUrl && project.imageUrl.startsWith('data:') ? (
@@ -256,10 +261,11 @@ const AllProjects = () => {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
 
         {/* Add More Projects Button - Only in Development */}
-        {process.env.NODE_ENV === 'development' && (
+        {!loading && !error && process.env.NODE_ENV === 'development' && (
           <div className="text-center">
             <button 
               onClick={openAddForm}

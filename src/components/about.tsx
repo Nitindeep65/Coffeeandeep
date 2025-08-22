@@ -99,9 +99,8 @@ const About = () => {
   ];
 
   const stats = [
-    { number: "3+", label: "Years Experience" },
-    { number: "50+", label: "Projects Completed" },
-    { number: "25+", label: "Happy Clients" },
+    { number: "1.5+", label: "Years Experience" },
+    { number: "15+", label: "Projects Completed" },
     { number: "100%", label: "Code Quality" }
   ];
 

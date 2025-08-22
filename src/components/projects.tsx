@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { apiService } from '@/lib/api';
 
 interface Project {
-  id: number;
+  _id?: string;
+  id?: number;
   title: string;
   description: string;
   fullDescription: string;
@@ -19,41 +21,28 @@ interface Project {
 const Projects = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([
-    {
-      id: 1,
-      title: "E-Commerce Platform",
-      description: "A full-stack e-commerce solution with modern UI and secure payments.",
-      fullDescription: "Built a comprehensive e-commerce platform using Next.js and TypeScript. Features include user authentication, product catalog, shopping cart, secure checkout with Stripe integration, order management, and admin dashboard. Implemented responsive design with Tailwind CSS and used MongoDB for data storage.",
-      technologies: ["Next.js", "TypeScript", "MongoDB", "Stripe", "Tailwind CSS"],
-      githubUrl: "https://github.com/yourusername/ecommerce",
-      liveUrl: "https://yourproject.com",
-      imageUrl: "/project1.jpg",
-      category: "Full Stack"
-    },
-    {
-      id: 2,
-      title: "Task Management App",
-      description: "Collaborative task management tool with real-time updates.",
-      fullDescription: "Developed a collaborative task management application with real-time synchronization. Features drag-and-drop task boards, team collaboration, deadline tracking, file attachments, and notifications. Built with React, Node.js, and Socket.io for real-time functionality.",
-      technologies: ["React", "Node.js", "Socket.io", "PostgreSQL", "Material-UI"],
-      githubUrl: "https://github.com/yourusername/taskmanager",
-      liveUrl: "https://yourtaskapp.com",
-      imageUrl: "/project2.jpg",
-      category: "Frontend"
-    },
-    {
-      id: 3,
-      title: "Weather Dashboard",
-      description: "Beautiful weather app with location-based forecasts and analytics.",
-      fullDescription: "Created a comprehensive weather dashboard that provides detailed weather information, forecasts, and analytics. Features include location-based weather, 7-day forecasts, weather maps, historical data, and personalized recommendations. Integrated with multiple weather APIs for accurate data.",
-      technologies: ["Vue.js", "Python", "FastAPI", "Chart.js", "OpenWeather API"],
-      githubUrl: "https://github.com/yourusername/weather",
-      liveUrl: "https://yourweather.com",
-      imageUrl: "/project3.jpg",
-      category: "Frontend"
-    }
-  ]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch projects from API
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getProjects();
+        setProjects(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        setError('Failed to load projects');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const [newProject, setNewProject] = useState({
     title: '',
@@ -125,23 +114,40 @@ const Projects = () => {
     }));
   };
 
-  const handleAddProject = (e: React.FormEvent) => {
+  const handleAddProject = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const project: Project = {
-      id: projects.length + 1,
-      title: newProject.title,
-      description: newProject.description,
-      fullDescription: newProject.fullDescription,
-      technologies: newProject.technologies.split(',').map(tech => tech.trim()),
-      githubUrl: newProject.githubUrl,
-      liveUrl: newProject.liveUrl,
-      imageUrl: newProject.imagePreview || `/project${projects.length + 1}.jpg`,
-      category: newProject.category
-    };
+    try {
+      const projectData = {
+        title: newProject.title,
+        description: newProject.description,
+        fullDescription: newProject.fullDescription,
+        technologies: newProject.technologies.split(',').map(tech => tech.trim()),
+        githubUrl: newProject.githubUrl,
+        liveUrl: newProject.liveUrl,
+        category: newProject.category
+      };
 
-    setProjects(prev => [...prev, project]);
-    closeAddForm();
+      const savedProject = await apiService.createProject(projectData, newProject.imageFile || undefined);
+      setProjects(prev => [...prev, savedProject]);
+      closeAddForm();
+      
+      // Reset form
+      setNewProject({
+        title: '',
+        description: '',
+        fullDescription: '',
+        technologies: '',
+        githubUrl: '',
+        liveUrl: '',
+        category: '',
+        imageFile: null,
+        imagePreview: ''
+      });
+    } catch (error) {
+      console.error('Error adding project:', error);
+      alert('Failed to add project. Please try again.');
+    }
   };
 
   return (
@@ -158,13 +164,29 @@ const Projects = () => {
           </p>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="text-gray-600 dark:text-zinc-400 mt-4">Loading projects...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-red-600 dark:text-red-400">{error}</p>
+          </div>
+        )}
+
         {/* Projects Grid - Show only first 3 projects */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {projects.slice(0, 3).map((project) => (
-            <div
-              key={project.id}
-              className="group bg-gray-50 dark:bg-zinc-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border dark:border-zinc-800"
-            >
+        {!loading && !error && (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {projects.slice(0, 3).map((project) => (
+              <div
+                key={project._id || project.id}
+                className="group bg-gray-50 dark:bg-zinc-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border dark:border-zinc-800"
+              >
               {/* Project Image */}
               <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center overflow-hidden">
                 {project.imageUrl && project.imageUrl.startsWith('data:') ? (
@@ -246,10 +268,11 @@ const Projects = () => {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
 
         {/* See More Projects Button */}
-        {projects.length >= 3 && (
+        {!loading && !error && projects.length >= 3 && (
           <div className="text-center mb-8">
             <Link
               href="/projects"
