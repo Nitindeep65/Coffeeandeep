@@ -197,11 +197,13 @@ const AllProjects = () => {
               {/* Project Image */}
               <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center overflow-hidden">
                 {project.imageUrl ? (
-                  // Project image exists
-                  <img 
+                  // Project image exists  
+                  <Image 
                     src={project.imageUrl} 
                     alt={project.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     onError={(e) => {
                       // If image fails to load, hide it and show placeholder
                       (e.target as HTMLImageElement).style.display = 'none';
@@ -217,9 +219,7 @@ const AllProjects = () => {
                     </div>
                     <p className="text-sm opacity-80">Project Image</p>
                   </div>
-                )}
-                
-                {/* Hover Overlay */}
+                )}                {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                   <button
                     onClick={() => openProjectModal(project)}
@@ -303,12 +303,14 @@ const AllProjects = () => {
               {/* Modal Header */}
               <div className="relative">
                 <div className="h-64 bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center overflow-hidden">
-                  {selectedProject.imageUrl && selectedProject.imageUrl.startsWith('data:') ? (
-                    // User uploaded image
-                    <img 
+                  {selectedProject.imageUrl ? (
+                    // Project image exists
+                    <Image 
                       src={selectedProject.imageUrl} 
                       alt={selectedProject.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
                     />
                   ) : (
                     // Placeholder

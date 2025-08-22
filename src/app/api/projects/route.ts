@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb/connect';
 import Project from '@/lib/mongodb/models/Project';
+import { writeFile, mkdir } from 'fs/promises';
+import path from 'path';
 
 export async function GET() {
   try {
@@ -9,6 +11,13 @@ export async function GET() {
     const projects = await Project.find({})
       .sort({ createdAt: -1 })
       .lean();
+    
+    // Debug: Log what we're returning
+    console.log('API: Returning projects:', projects.map(p => ({ 
+      title: p.title, 
+      imageUrl: p.imageUrl,
+      hasImage: !!p.imageUrl 
+    })));
     
     return NextResponse.json(projects);
   } catch (error) {
@@ -26,12 +35,13 @@ export async function POST(request: NextRequest) {
     
     const contentType = request.headers.get('content-type') || '';
     let projectData: any;
+    let imageUrl: string | null = null;
     
     if (contentType.includes('application/json')) {
       // Handle JSON data
       projectData = await request.json();
     } else {
-      // Handle FormData
+      // Handle FormData (with image upload)
       const formData = await request.formData();
       projectData = {
         title: formData.get('title'),
@@ -42,6 +52,49 @@ export async function POST(request: NextRequest) {
         liveUrl: formData.get('liveUrl'),
         category: formData.get('category'),
       };
+
+      // Handle image upload
+      const imageFile = formData.get('image') as File;
+      if (imageFile && imageFile.size > 0) {
+        console.log('Processing image upload:', { 
+          name: imageFile.name, 
+          size: imageFile.size, 
+          type: imageFile.type 
+        });
+        
+        try {
+          // Create uploads directory if it doesn't exist
+          const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+          try {
+            await mkdir(uploadDir, { recursive: true });
+          } catch (error) {
+            // Directory might already exist, continue
+          }
+
+          // Generate unique filename
+          const timestamp = Date.now();
+          const originalName = imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '');
+          const filename = `project-${timestamp}-${originalName}`;
+          const filepath = path.join(uploadDir, filename);
+
+          // Convert file to buffer and save
+          const bytes = await imageFile.arrayBuffer();
+          const buffer = Buffer.from(bytes);
+          await writeFile(filepath, buffer);
+
+          // Set the image URL for the database
+          imageUrl = `/uploads/${filename}`;
+          console.log('Image saved successfully:', { filepath, imageUrl });
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          return NextResponse.json(
+            { error: 'Failed to upload image' },
+            { status: 500 }
+          );
+        }
+      } else {
+        console.log('No image file provided or file is empty');
+      }
     }
     
     // Validate required fields
@@ -67,7 +120,7 @@ export async function POST(request: NextRequest) {
       githubUrl,
       liveUrl,
       category: category || 'Frontend',
-      imageUrl: projectData.imageUrl || null,
+      imageUrl: imageUrl || projectData.imageUrl || null,
       featured: projectData.featured || false
     });
     
