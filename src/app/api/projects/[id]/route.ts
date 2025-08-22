@@ -11,7 +11,28 @@ export async function PUT(
   try {
     await connectDB();
     
-    const body = await request.json();
+    const contentType = request.headers.get('content-type') || '';
+    let projectData: any;
+    
+    if (contentType.includes('application/json')) {
+      // Handle JSON data
+      projectData = await request.json();
+    } else {
+      // Handle FormData
+      const formData = await request.formData();
+      projectData = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        fullDescription: formData.get('fullDescription'),
+        technologies: formData.get('technologies'),
+        githubUrl: formData.get('githubUrl'),
+        liveUrl: formData.get('liveUrl'),
+        category: formData.get('category'),
+        imageUrl: formData.get('imageUrl'),
+        featured: formData.get('featured'),
+      };
+    }
+    
     const { id } = await params;
     
     // Validate ObjectId
@@ -23,13 +44,13 @@ export async function PUT(
     }
     
     // Ensure technologies is an array
-    if (body.technologies && !Array.isArray(body.technologies)) {
-      body.technologies = body.technologies.split(',').map((tech: string) => tech.trim());
+    if (projectData.technologies && !Array.isArray(projectData.technologies)) {
+      projectData.technologies = projectData.technologies.split(',').map((tech: string) => tech.trim());
     }
     
     const updatedProject = await Project.findByIdAndUpdate(
       id,
-      { ...body, updatedAt: new Date() },
+      { ...projectData, updatedAt: new Date() },
       { new: true, runValidators: true }
     );
     
