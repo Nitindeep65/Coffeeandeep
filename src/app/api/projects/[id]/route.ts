@@ -5,13 +5,13 @@ import mongoose from 'mongoose';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
     
     const body = await request.json();
-    const { id } = params;
+    const { id } = await params;
     
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -62,12 +62,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
     
-    const { id } = params;
+    const { id } = await params;
     
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
