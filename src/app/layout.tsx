@@ -28,8 +28,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-black text-gray-900 dark:text-zinc-100 transition-colors duration-300`}
       >
-        {children}
-        <Analytics/>
+        {children} 
+        <Analytics />
       </body>
     </html>
   );
