@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { apiService } from '@/lib/api';
+import { Progress } from '@/components/ui/progress';
+import { CardContainer, CardBody, CardItem } from '@/components/ui/shadcn-io/3d-card';
 
 interface Project {
   _id?: string;
@@ -220,24 +222,26 @@ const Projects = () => {
   };
 
   return (
-    <section id="projects" className="py-20 bg-white dark:bg-black transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="projects" className="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-zinc-900 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            My <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Projects</span>
+            Featured Projects
           </h2>
           <p className="text-xl text-gray-600 dark:text-zinc-400 max-w-3xl mx-auto">
-            Here are some of the projects I've worked on. Each one represents a unique challenge and learning experience.
+            Explore my portfolio of web applications, showcasing expertise in modern technologies and problem-solving capabilities.
           </p>
         </div>
 
         {/* Loading State */}
         {loading && (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-gray-600 dark:text-zinc-400 mt-4">Loading projects...</p>
+          <div className="text-center py-12 space-y-4">
+            <p className="text-gray-600 dark:text-zinc-400 mb-4">Loading projects...</p>
+            <div className="max-w-md mx-auto">
+              <Progress value={66} className="h-2 bg-gray-200 dark:bg-zinc-800" />
+            </div>
           </div>
         )}
 
@@ -274,108 +278,107 @@ const Projects = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
                 {projects.slice(0, 3).map((project) => (
-                  <div
-                    key={project._id || project.id}
-                    className="group bg-gray-50 dark:bg-zinc-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border dark:border-zinc-800"
-                  >
-              {/* Project Image */}
-              <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center overflow-hidden">
-                {project.imageUrl ? (
-                  // Project image exists - using regular img temporarily for debugging
-                  <img 
-                    src={project.imageUrl} 
-                    alt={project.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      console.error(`Failed to load image: ${project.imageUrl}`);
-                      // If image fails to load, hide it and show placeholder
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                    onLoad={() => {
-                      console.log(`Successfully loaded image: ${project.imageUrl}`);
-                    }}
-                  />
-                ) : (
-                  // Placeholder for project image
-                  <div className="text-white text-center">
-                    <div className="w-16 h-16 mx-auto mb-2 bg-white/20 rounded-lg flex items-center justify-center">
-                      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                      </svg>
-                    </div>
-                    <p className="text-sm opacity-80">Project Image</p>
-                    <p className="text-xs opacity-60">URL: {project.imageUrl || 'No URL'}</p>
-                  </div>
-                )}
-                
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <button
-                    onClick={() => openProjectModal(project)}
-                    className="bg-white text-gray-900 px-6 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors duration-200"
-                  >
-                    View Details
-                  </button>
-                </div>
-              </div>
-
-              {/* Project Info */}
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  {project.title}
-                </h3>
-                
-                <p className="text-gray-600 dark:text-zinc-400 text-sm mb-4 line-clamp-2">
-                  {project.description}
-                </p>
-
-                {/* Technologies */}
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {(project.technologies || []).slice(0, 3).map((tech) => (
-                    <span
-                      key={tech}
-                      className="text-xs bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 px-2 py-1 rounded"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                  {(project.technologies || []).length > 3 && (
-                    <span className="text-xs text-gray-500 dark:text-zinc-500">
-                      +{(project.technologies || []).length - 3} more
-                    </span>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <a
-                    href={project.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 bg-gray-900 dark:bg-zinc-700 text-white text-center py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-zinc-600 transition-colors duration-200"
-                  >
-                    GitHub
-                  </a>
-                  <a
-                    href={project.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 bg-blue-600 text-white text-center py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200"
-                  >
-                    Live Demo
-                  </a>
-                  {/* Edit Button - Only in Development */}
-                  {process.env.NODE_ENV === 'development' && (
-                    <button
-                      onClick={() => openEditForm(project)}
-                      className="flex-1 bg-purple-600 text-white text-center py-2 px-4 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors duration-200"
-                    >
-                      Edit
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
+                  <CardContainer key={project._id || project.id} className="inter-var" containerClassName="py-0">
+                    <CardBody className="bg-gray-50 dark:bg-zinc-900 relative group/card border dark:border-zinc-800 w-auto sm:w-[24rem] h-auto rounded-xl p-6">
+                      <CardItem
+                        translateZ="50"
+                        className="text-xl font-bold text-gray-900 dark:text-white"
+                      >
+                        {project.title}
+                      </CardItem>
+                      
+                      <CardItem
+                        as="p"
+                        translateZ="60"
+                        className="text-gray-600 dark:text-zinc-400 text-sm max-w-sm mt-2"
+                      >
+                        {project.description}
+                      </CardItem>
+                      
+                      <CardItem translateZ="100" className="w-full mt-4">
+                        <div className="relative h-48 w-full rounded-xl overflow-hidden bg-gradient-to-br from-blue-400 to-purple-600">
+                          {project.imageUrl ? (
+                            <img 
+                              src={project.imageUrl} 
+                              alt={project.title}
+                              className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-300"
+                              onError={(e) => {
+                                console.error(`Failed to load image: ${project.imageUrl}`);
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-white">
+                              <div className="text-center">
+                                <div className="w-16 h-16 mx-auto mb-2 bg-white/20 rounded-lg flex items-center justify-center">
+                                  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                  </svg>
+                                </div>
+                                <p className="text-sm">Project Image</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </CardItem>
+                      
+                      <CardItem
+                        translateZ="60"
+                        className="flex flex-wrap gap-1 mt-4"
+                      >
+                        {(project.technologies || []).slice(0, 3).map((tech) => (
+                          <span
+                            key={tech}
+                            className="text-xs bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 px-2 py-1 rounded"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                        {(project.technologies || []).length > 3 && (
+                          <span className="text-xs text-gray-500 dark:text-zinc-500">
+                            +{(project.technologies || []).length - 3}
+                          </span>
+                        )}
+                      </CardItem>
+                      
+                      <div className="flex justify-between items-center mt-6">
+                        <CardItem
+                          translateZ={20}
+                          as="a"
+                          href={project.githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 rounded-xl text-xs font-normal text-gray-900 dark:text-white bg-gray-200 dark:bg-zinc-800 hover:bg-gray-300 dark:hover:bg-zinc-700 transition-colors"
+                        >
+                          GitHub →
+                        </CardItem>
+                        <CardItem
+                          translateZ={20}
+                          as="a"
+                          href={project.liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-bold hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+                        >
+                          Live Demo
+                        </CardItem>
+                      </div>
+                      
+                      {process.env.NODE_ENV === 'development' && (
+                        <CardItem
+                          translateZ={20}
+                          className="w-full mt-3"
+                        >
+                          <button
+                            onClick={() => openEditForm(project)}
+                            className="w-full px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold hover:bg-purple-700 transition-colors"
+                          >
+                            Edit Project
+                          </button>
+                        </CardItem>
+                      )}
+                    </CardBody>
+                  </CardContainer>
                 ))}
               </div>
             )}
@@ -387,9 +390,9 @@ const Projects = () => {
           <div className="text-center mb-8">
             <Link
               href="/projects"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-3 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-200"
             >
-              <span>See All Projects</span>
+              <span>View All Projects</span>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>

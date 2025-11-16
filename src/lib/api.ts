@@ -120,6 +120,14 @@ class ApiService {
   }
 
   async createExperience(experienceData: any) {
+    // experienceData can be FormData or plain object
+    if (experienceData instanceof FormData) {
+      return this.request('/experience', {
+        method: 'POST',
+        body: experienceData,
+      });
+    }
+    
     return this.request('/experience', {
       method: 'POST',
       body: JSON.stringify(experienceData),
@@ -127,6 +135,14 @@ class ApiService {
   }
 
   async updateExperience(id: string, experienceData: any) {
+    // experienceData can be FormData or plain object
+    if (experienceData instanceof FormData) {
+      return this.request(`/experience/${id}`, {
+        method: 'PUT',
+        body: experienceData,
+      });
+    }
+    
     return this.request(`/experience/${id}`, {
       method: 'PUT',
       body: JSON.stringify(experienceData),

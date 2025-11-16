@@ -14,8 +14,36 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio | Developer",
-  description: "A passionate developer's portfolio showcasing projects and skills",
+  title: "Nitindeep Singh | Full Stack Developer & Software Engineer",
+  description: "Experienced Full Stack Developer specializing in React, Next.js, Node.js, and TypeScript. Building scalable web applications with modern technologies and best practices.",
+  keywords: ["Full Stack Developer", "Software Engineer", "React Developer", "Next.js", "TypeScript", "Node.js", "Web Development", "UI/UX Design"],
+  authors: [{ name: "Nitindeep Singh" }],
+  creator: "Nitindeep Singh",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://yourwebsite.com",
+    title: "Nitindeep Singh | Full Stack Developer & Software Engineer",
+    description: "Experienced Full Stack Developer specializing in React, Next.js, Node.js, and TypeScript. Building scalable web applications with modern technologies.",
+    siteName: "Nitindeep Singh Portfolio",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nitindeep Singh | Full Stack Developer",
+    description: "Experienced Full Stack Developer specializing in modern web technologies",
+    creator: "@_NitindeepSingh",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({
