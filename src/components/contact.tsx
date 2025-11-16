@@ -1,16 +1,48 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 
+const formSchema = z.object({
+  name: z.string().min(2, {
+    message: 'Name must be at least 2 characters.',
+  }),
+  email: z.string().email({
+    message: 'Please enter a valid email address.',
+  }),
+  subject: z.string().min(5, {
+    message: 'Subject must be at least 5 characters.',
+  }),
+  message: z.string().min(10, {
+    message: 'Message must be at least 10 characters.',
+  }),
+});
+
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      subject: '',
+      message: '',
+    },
+  });
 
   const socialLinks = [
     {
@@ -59,16 +91,7 @@ const Contact = () => {
     }
   ];
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
@@ -78,24 +101,18 @@ const Contact = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(values),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         setSubmitStatus('success');
-        setFormData({
-          name: '',
-          email: '',
-          subject: '',
-          message: ''
-        });
+        form.reset();
       } else {
         throw new Error(data.error || 'Failed to send message');
       }
       
-      // Reset status after 5 seconds
       setTimeout(() => setSubmitStatus('idle'), 5000);
     } catch (error) {
       console.error('Contact form error:', error);
@@ -104,7 +121,7 @@ const Contact = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
 
   return (
     <section id="contact" className="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-zinc-900 transition-colors duration-300">
@@ -197,152 +214,172 @@ const Contact = () => {
           </div>
 
           {/* Contact Form */}
-          <div className="bg-white dark:bg-black rounded-2xl p-8 shadow-lg border dark:border-zinc-800 relative overflow-hidden">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-zinc-800 relative overflow-hidden">
             {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full -translate-y-16 translate-x-16"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/10 to-pink-500/10 rounded-full translate-y-12 -translate-x-12"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-500/5 to-purple-500/5 dark:from-blue-500/10 dark:to-purple-500/10 rounded-full -translate-y-32 translate-x-32 blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-purple-500/5 to-pink-500/5 dark:from-purple-500/10 dark:to-pink-500/10 rounded-full translate-y-24 -translate-x-24 blur-3xl"></div>
             
             <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
+              <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-200 dark:border-zinc-800">
+                <div className="p-3 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl shadow-lg">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                   </svg>
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Send a Message
+                    Get in Touch
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-zinc-400">
-                    Fill out the form below to get in touch
+                  <p className="text-sm text-gray-600 dark:text-zinc-400 mt-1">
+                    Send me a message and I'll respond within 24 hours
                   </p>
                 </div>
               </div>
             
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Name and Email */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
-                    Your Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Name and Email */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                  <FormField
+                    control={form.control}
                     name="name"
-                    value={formData.name}
-                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white transition-colors duration-200"
-                    placeholder="John Doe"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-gray-700 dark:text-zinc-300">
+                          Your Name
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="John Doe"
+                            {...field}
+                            className="h-12"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
-                    Your Email *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
+                  <FormField
+                    control={form.control}
                     name="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white transition-colors duration-200"
-                    placeholder="john@example.com"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-gray-700 dark:text-zinc-300">
+                          Your Email
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="john@example.com"
+                            {...field}
+                            className="h-12"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
-              </div>
 
-              {/* Subject */}
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
-                  Subject *
-                </label>
-                <input
-                  type="text"
-                  id="subject"
+                {/* Subject */}
+                <FormField
+                  control={form.control}
                   name="subject"
-                  value={formData.subject}
-                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white transition-colors duration-200"
-                  placeholder="Project collaboration"
-                />
-              </div>
-
-              {/* Message */}
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
-                  Your Message *
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  required
-                  rows={6}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white transition-colors duration-200 resize-none"
-                  placeholder="Hi Nitindeep! I'd love to discuss..."
-                />
-              </div>
-
-              {/* Submit Button */}
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-4 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-100 focus:ring-4 focus:ring-gray-500/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center justify-center gap-3">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white dark:text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>Sending message...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center gap-3">
-                      <span>Send Message</span>
-                      <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                      </svg>
-                    </div>
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-gray-700 dark:text-zinc-300">
+                        Subject
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Project collaboration"
+                          {...field}
+                          className="h-12"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </button>
-              </div>
+                />
 
-              {/* Status Messages */}
-              {submitStatus === 'success' && (
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-green-800 dark:text-green-200">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                    </svg>
-                    <span className="font-medium">Message sent successfully!</span>
-                  </div>
-                  <p className="text-green-700 dark:text-green-300 text-sm mt-1">
-                    Thank you for reaching out. I'll get back to you soon!
-                  </p>
-                </div>
-              )}
+                {/* Message */}
+                <FormField
+                  control={form.control}
+                  name="message"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-gray-700 dark:text-zinc-300">
+                        Your Message
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          rows={6}
+                          placeholder="Hi Nitindeep! I'd love to discuss..."
+                          {...field}
+                          className="resize-none"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {submitStatus === 'error' && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-red-800 dark:text-red-200">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                    </svg>
-                    <span className="font-medium">Failed to send message</span>
-                  </div>
-                  <p className="text-red-700 dark:text-red-300 text-sm mt-1">
-                    Please try again or contact me directly via email.
-                  </p>
+                {/* Submit Button */}
+                <div className="pt-4">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-4 rounded-lg font-semibold focus:ring-2 focus:ring-gray-900 dark:focus:ring-white focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800 dark:hover:bg-gray-100"
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center justify-center gap-3">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white dark:text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Sending message...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-3">
+                        <span>Send Message</span>
+                        <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                      </div>
+                    )}
+                  </button>
                 </div>
-              )}
-            </form>
+
+                {/* Status Messages */}
+                {submitStatus === 'success' && (
+                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-green-800 dark:text-green-200">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                      <span className="font-medium">Message sent successfully!</span>
+                    </div>
+                    <p className="text-green-700 dark:text-green-300 text-sm mt-1">
+                      Thank you for reaching out. I'll get back to you soon!
+                    </p>
+                  </div>
+                )}
+
+                {submitStatus === 'error' && (
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-red-800 dark:text-red-200">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                      </svg>
+                      <span className="font-medium">Failed to send message</span>
+                    </div>
+                    <p className="text-red-700 dark:text-red-300 text-sm mt-1">
+                      Please try again or contact me directly via email.
+                    </p>
+                  </div>
+                )}
+              </form>
+            </Form>
             </div>
           </div>
         </div>
