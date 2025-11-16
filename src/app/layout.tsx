@@ -19,6 +19,11 @@ export const metadata: Metadata = {
   keywords: ["Full Stack Developer", "Software Engineer", "React Developer", "Next.js", "TypeScript", "Node.js", "Web Development", "UI/UX Design"],
   authors: [{ name: "Nitindeep Singh" }],
   creator: "Nitindeep Singh",
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -26,12 +31,21 @@ export const metadata: Metadata = {
     title: "Nitindeep Singh | Full Stack Developer & Software Engineer",
     description: "Experienced Full Stack Developer specializing in React, Next.js, Node.js, and TypeScript. Building scalable web applications with modern technologies.",
     siteName: "Nitindeep Singh Portfolio",
+    images: [
+      {
+        url: '/logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Nitindeep Singh Portfolio',
+      }
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Nitindeep Singh | Full Stack Developer",
     description: "Experienced Full Stack Developer specializing in modern web technologies",
     creator: "@_NitindeepSingh",
+    images: ['/logo.png'],
   },
   robots: {
     index: true,
