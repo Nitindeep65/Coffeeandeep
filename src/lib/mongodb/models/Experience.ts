@@ -10,6 +10,7 @@ export interface IExperience extends Document {
   current: boolean;
   startDate: Date;
   endDate?: Date;
+  imageUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -75,6 +76,10 @@ const ExperienceSchema = new Schema<IExperience>({
       },
       message: 'End date must be after start date and properly set based on current status'
     }
+  },
+  imageUrl: {
+    type: String,
+    trim: true
   }
 }, {
   timestamps: true

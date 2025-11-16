@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { apiService } from '@/lib/api';
+import { Progress } from '@/components/ui/progress';
+import { AnimatedTestimonials, type Testimonial } from '@/components/ui/shadcn-io/animated-testimonials';
+import { Terminal, AnimatedSpan, TypingAnimation } from '@/components/ui/shadcn-io/terminal';
 
 interface Experience {
   _id?: string;
@@ -15,6 +18,7 @@ interface Experience {
   current?: boolean;
   startDate?: Date;
   endDate?: Date;
+  imageUrl?: string; // Add this field for experience images
 }
 
 const About = () => {
@@ -34,7 +38,9 @@ const About = () => {
     technologies: '',
     current: false,
     startDate: '',
-    endDate: ''
+    endDate: '',
+    imageFile: null as File | null,
+    imagePreview: ''
   });
 
   // Fetch experiences from API
@@ -77,6 +83,29 @@ const About = () => {
     }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewExperience(prev => ({
+          ...prev,
+          imageFile: file,
+          imagePreview: reader.result as string
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setNewExperience(prev => ({
+      ...prev,
+      imageFile: null,
+      imagePreview: ''
+    }));
+  };
+
   const openEditExperienceForm = (experience: Experience) => {
     setEditingExperience(experience);
     setNewExperience({
@@ -88,7 +117,9 @@ const About = () => {
       technologies: Array.isArray(experience.technologies) ? experience.technologies.join(', ') : '',
       current: experience.current || false,
       startDate: experience.startDate ? new Date(experience.startDate).toISOString().split('T')[0] : '',
-      endDate: experience.endDate ? new Date(experience.endDate).toISOString().split('T')[0] : ''
+      endDate: experience.endDate ? new Date(experience.endDate).toISOString().split('T')[0] : '',
+      imageFile: null,
+      imagePreview: experience.imageUrl || ''
     });
     setShowEditExperienceForm(true);
   };
@@ -105,7 +136,9 @@ const About = () => {
       technologies: '',
       current: false,
       startDate: '',
-      endDate: ''
+      endDate: '',
+      imageFile: null,
+      imagePreview: ''
     });
   };
 
@@ -113,26 +146,39 @@ const About = () => {
     e.preventDefault();
     
     try {
-      const experienceData = {
-        title: newExperience.title,
-        company: newExperience.company,
-        duration: newExperience.duration,
-        location: newExperience.location,
-        description: newExperience.description,
-        technologies: newExperience.technologies.split(',').map(tech => tech.trim()),
-        current: newExperience.current,
-        startDate: newExperience.startDate ? new Date(newExperience.startDate) : new Date(),
-        endDate: newExperience.endDate ? new Date(newExperience.endDate) : undefined
-      };
+      const formData = new FormData();
+      formData.append('title', newExperience.title);
+      formData.append('company', newExperience.company);
+      formData.append('duration', newExperience.duration);
+      formData.append('location', newExperience.location);
+      formData.append('description', newExperience.description);
+      formData.append('technologies', newExperience.technologies);
+      formData.append('current', String(newExperience.current));
+      
+      // Send dates as ISO strings
+      const startDate = newExperience.startDate ? new Date(newExperience.startDate).toISOString() : new Date().toISOString();
+      formData.append('startDate', startDate);
+      
+      // Only add endDate if not current job
+      if (!newExperience.current && newExperience.endDate) {
+        const endDate = new Date(newExperience.endDate).toISOString();
+        formData.append('endDate', endDate);
+      }
+      
+      // Add image file if present
+      if (newExperience.imageFile) {
+        formData.append('image', newExperience.imageFile);
+        console.log('Adding image file to FormData:', newExperience.imageFile.name);
+      }
 
       if (editingExperience) {
         // Update existing experience
-        const updatedExperience = await apiService.updateExperience(editingExperience._id!, experienceData);
+        const updatedExperience = await apiService.updateExperience(editingExperience._id!, formData);
         setExperiences(prev => prev.map(exp => exp._id === editingExperience._id ? updatedExperience.experience : exp));
         closeEditExperienceForm();
       } else {
         // Create new experience
-        const savedExperience = await apiService.createExperience(experienceData);
+        const savedExperience = await apiService.createExperience(formData);
         setExperiences(prev => [savedExperience.experience, ...prev]);
         setNewExperience({
           title: '',
@@ -143,7 +189,9 @@ const About = () => {
           technologies: '',
           current: false,
           startDate: '',
-          endDate: ''
+          endDate: '',
+          imageFile: null,
+          imagePreview: ''
         });
         setShowAddExperienceForm(false);
       }
@@ -180,16 +228,16 @@ const About = () => {
   ];
 
   return (
-    <section id="about" className="py-20 bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="about" className="py-12 sm:py-16 lg:py-20 bg-white dark:bg-black transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            About <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Me</span>
+            Professional Background
           </h2>
           <p className="text-xl text-gray-600 dark:text-zinc-400 max-w-3xl mx-auto">
-            Passionate about creating digital experiences that make a difference
+            Software engineer with a proven track record of delivering scalable solutions and exceptional user experiences.
           </p>
         </div>
 
@@ -197,7 +245,7 @@ const About = () => {
         <div className="mt-20">
           <div className="flex items-center justify-between mb-12">
             <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Work <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Experience</span>
+              Professional Experience
             </h3>
             
             {/* Add Experience Button - Only in Development */}
@@ -211,11 +259,13 @@ const About = () => {
             )}
           </div>
 
-          {/* Experience Timeline */}
+          {/* Experience with Animated Testimonials */}
           {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-600 dark:text-zinc-400 mt-4">Loading experiences...</p>
+            <div className="text-center py-12 space-y-4">
+              <p className="text-gray-600 dark:text-zinc-400 mb-4">Loading experiences...</p>
+              <div className="max-w-md mx-auto">
+                <Progress value={66} className="h-2 bg-gray-200 dark:bg-zinc-800" />
+              </div>
             </div>
           ) : error ? (
             <div className="text-center py-12">
@@ -234,122 +284,89 @@ const About = () => {
               )}
             </div>
           ) : (
-            <div className="space-y-8">
-              {experiences.map((experience, index) => (
-                <div key={experience._id || experience.id} className="relative">
-                  {/* Timeline line */}
-                  {index !== experiences.length - 1 && (
-                    <div className="absolute left-4 top-12 w-0.5 h-full bg-gray-200 dark:bg-zinc-700"></div>
-                  )}
-                  
-                  <div className="flex gap-6">
-                    {/* Timeline dot */}
-                    <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mt-2">
-                      <div className="w-3 h-3 bg-white rounded-full"></div>
+            <>
+              <AnimatedTestimonials
+                autoplay={true}
+                testimonials={experiences.map((experience, idx): Testimonial => ({
+                  quote: experience.description,
+                  name: experience.title,
+                  designation: `${experience.company} • ${experience.duration} • ${experience.location}`,
+                  src: experience.imageUrl || 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=400&fit=crop',
+                }))}
+              />
+              
+              {/* Edit Experience Controls - Only in Development */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-8 flex flex-wrap gap-3 justify-center">
+                  {experiences.map((experience) => (
+                    <div key={experience._id || experience.id} className="flex gap-2 items-center bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-lg p-3">
+                      <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 truncate max-w-[200px]">
+                        {experience.title}
+                      </span>
+                      <button
+                        onClick={() => openEditExperienceForm(experience)}
+                        className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 p-1.5 rounded transition-colors duration-200"
+                        title="Edit experience"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => deleteExperience(experience._id!)}
+                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1.5 rounded transition-colors duration-200"
+                        title="Delete experience"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
                     </div>
-                    
-                    {/* Experience content */}
-                    <div className="flex-1 bg-white dark:bg-zinc-900 rounded-xl p-6 border dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow duration-200">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                            {experience.title}
-                          </h4>
-                          <div className="flex flex-wrap items-center gap-4 text-gray-600 dark:text-zinc-400 text-sm">
-                            <span className="font-medium text-blue-600 dark:text-blue-400">
-                              {experience.company}
-                            </span>
-                            <span>{experience.duration}</span>
-                            <span>{experience.location}</span>
-                          </div>
-                        </div>
-                        
-                        {/* Action buttons - Only in Development */}
-                        {process.env.NODE_ENV === 'development' && (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => openEditExperienceForm(experience)}
-                              className="text-blue-500 hover:text-blue-700 p-1 rounded transition-colors duration-200"
-                              title="Edit experience"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => deleteExperience(experience._id!)}
-                              className="text-red-500 hover:text-red-700 p-1 rounded transition-colors duration-200"
-                              title="Delete experience"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      <p className="text-gray-700 dark:text-zinc-300 mb-4 leading-relaxed">
-                        {experience.description}
-                      </p>
-
-                      {/* Technologies */}
-                      <div className="flex flex-wrap gap-2">
-                        {(experience.technologies || []).map((tech, techIndex) => (
-                          <span
-                            key={techIndex}
-                            className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full font-medium"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-16 items-start mt-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-start mt-12 sm:mt-16 lg:mt-20">
           
           {/* Left Side - Story & Description */}
-          <div className="space-y-8">
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                My Journey
+          <div className="space-y-6 sm:space-y-8">
+            <div className="space-y-4 sm:space-y-6">
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
+                Technical Expertise
               </h3>
               
-              <div className="space-y-4 text-gray-700 dark:text-zinc-300 leading-relaxed">
+              <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700 dark:text-zinc-300 leading-relaxed">
                 <p>
-                  I'm a passionate full-stack developer with over 3 years of experience in building 
-                  modern web applications. My journey started with curiosity about how websites work, 
-                  and it has evolved into a deep love for creating seamless digital experiences.
+                  Full-stack software engineer with 1.5+ years of professional experience building 
+                  scalable web applications. Specialized in modern JavaScript frameworks including React, 
+                  Next.js, and Node.js, with strong expertise in TypeScript and database design.
                 </p>
                 
                 <p>
-                  I specialize in React, Next.js, and modern JavaScript frameworks, with a strong 
-                  foundation in backend technologies like Node.js and Python. I believe in writing 
-                  clean, maintainable code and creating user interfaces that are both beautiful and functional.
+                  Focused on delivering high-quality code through test-driven development, implementing 
+                  best practices for performance optimization, and creating responsive user interfaces 
+                  that enhance user engagement and satisfaction.
                 </p>
                 
                 <p>
-                  When I'm not coding, you'll find me exploring new technologies, contributing to 
-                  open-source projects, or sharing knowledge with the developer community. I'm always 
-                  excited to take on new challenges and collaborate on innovative projects.
+                  Experienced in cloud technologies, containerization with Docker, and CI/CD pipelines. 
+                  Committed to staying current with industry trends and continuously expanding technical 
+                  skills to deliver innovative solutions.
                 </p>
               </div>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:gap-6">
               {stats.map((stat, index) => (
-                <div key={index} className="text-center p-4 sm:p-6 bg-white dark:bg-zinc-900 rounded-xl border dark:border-zinc-800 shadow-sm">
-                  <div className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                <div key={index} className="text-center p-2 sm:p-3 lg:p-6 bg-white dark:bg-zinc-900 rounded-lg sm:rounded-xl border dark:border-zinc-800 shadow-sm">
+                  <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-0.5 sm:mb-1 lg:mb-2">
                     {stat.number}
                   </div>
-                  <div className="text-gray-600 dark:text-zinc-400 text-xs sm:text-sm font-medium">
+                  <div className="text-gray-600 dark:text-zinc-400 text-[9px] sm:text-xs lg:text-sm font-medium leading-tight">
                     {stat.label}
                   </div>
                 </div>
@@ -358,34 +375,68 @@ const About = () => {
           </div>
 
           {/* Right Side - Skills */}
-          <div className="space-y-8">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
               Skills & Technologies
             </h3>
             
-            <div className="space-y-8">
-              {skills.map((skillGroup, index) => (
-                <div key={index} className="space-y-4">
-                  <h4 className="text-lg font-semibold text-gray-800 dark:text-zinc-200">
-                    {skillGroup.category}
-                  </h4>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {skillGroup.items.map((skill, skillIndex) => (
-                      <div 
-                        key={skillIndex}
-                        className="flex items-center space-x-3 p-3 bg-white dark:bg-zinc-900 rounded-lg border dark:border-zinc-800 hover:border-blue-300 dark:hover:border-blue-600 transition-colors duration-200"
-                      >
-                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                        <span className="text-gray-700 dark:text-zinc-300 text-sm font-medium">
-                          {skill}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Terminal Component for Skills */}
+            <Terminal className="w-full h-[300px] sm:h-[380px] lg:h-[450px]">
+              <AnimatedSpan delay={100}>
+                <span className="text-green-500">Nitindeep@portfolio</span>
+                <span className="text-gray-500">:</span>
+                <span className="text-blue-500">~/skills</span>
+                <span className="text-gray-500">$ </span>
+                <TypingAnimation delay={500} duration={40}>
+                  cat frontend.txt
+                </TypingAnimation>
+              </AnimatedSpan>
+              <AnimatedSpan delay={2000} className="text-cyan-400 pl-4">
+                → React • Next.js • TypeScript • Tailwind CSS • JavaScript • HTML5
+              </AnimatedSpan>
+              <AnimatedSpan delay={2200}>{" "}</AnimatedSpan>
+              
+              <AnimatedSpan delay={2500}>
+                <span className="text-green-500">Nitindeep@portfolio</span>
+                <span className="text-gray-500">:</span>
+                <span className="text-blue-500">~/skills</span>
+                <span className="text-gray-500">$ </span>
+                <TypingAnimation delay={3000} duration={40}>
+                  cat backend.txt
+                </TypingAnimation>
+              </AnimatedSpan>
+              <AnimatedSpan delay={4500} className="text-cyan-400 pl-4">
+                → Node.js • Python • Express.js • RESTful APIs • GraphQL • MongoDB
+              </AnimatedSpan>
+              <AnimatedSpan delay={4700}>{" "}</AnimatedSpan>
+              
+              <AnimatedSpan delay={5000}>
+                <span className="text-green-500">Nitindeep@portfolio</span>
+                <span className="text-gray-500">:</span>
+                <span className="text-blue-500">~/skills</span>
+                <span className="text-gray-500">$ </span>
+                <TypingAnimation delay={5500} duration={40}>
+                  cat tools.txt
+                </TypingAnimation>
+              </AnimatedSpan>
+              <AnimatedSpan delay={7000} className="text-cyan-400 pl-4">
+                → Git • Docker • AWS • Figma • VS Code • Linux
+              </AnimatedSpan>
+              <AnimatedSpan delay={7200}>{" "}</AnimatedSpan>
+              
+              <AnimatedSpan delay={7500}>
+                <span className="text-green-500">Nitindeep@portfolio</span>
+                <span className="text-gray-500">:</span>
+                <span className="text-blue-500">~/skills</span>
+                <span className="text-gray-500">$ </span>
+                <TypingAnimation delay={8000} duration={40}>
+                  echo "Total projects: 15+"
+                </TypingAnimation>
+              </AnimatedSpan>
+              <AnimatedSpan delay={9500} className="text-yellow-400 pl-4">
+                Total projects: 15+
+              </AnimatedSpan>
+            </Terminal>
           </div>
         </div>
 
@@ -522,6 +573,63 @@ const About = () => {
                   />
                   <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1">
                     Separate technologies with commas
+                  </p>
+                </div>
+
+                {/* Experience Image */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                    Experience Image
+                  </label>
+                  
+                  {newExperience.imagePreview ? (
+                    <div className="space-y-3">
+                      <div className="relative w-full h-48 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden">
+                        <img 
+                          src={newExperience.imagePreview} 
+                          alt="Experience preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <label className="flex-1 bg-blue-600 text-white text-center py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 cursor-pointer">
+                          Change Image
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors duration-200"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="block w-full h-32 border-2 border-dashed border-gray-300 dark:border-zinc-600 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 transition-colors duration-200 cursor-pointer">
+                      <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-zinc-400">
+                        <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span className="text-sm font-medium">Click to upload image</span>
+                        <span className="text-xs">PNG, JPG, GIF up to 10MB</span>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                  
+                  <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1">
+                    Optional: Upload a company logo or related image
                   </p>
                 </div>
 
@@ -711,6 +819,63 @@ const About = () => {
                   />
                   <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">
                     Separate technologies with commas
+                  </p>
+                </div>
+
+                {/* Experience Image */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                    Experience Image
+                  </label>
+                  
+                  {newExperience.imagePreview ? (
+                    <div className="space-y-3">
+                      <div className="relative w-full h-48 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden">
+                        <img 
+                          src={newExperience.imagePreview} 
+                          alt="Experience preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <label className="flex-1 bg-blue-600 text-white text-center py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 cursor-pointer">
+                          Change Image
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors duration-200"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="block w-full h-32 border-2 border-dashed border-gray-300 dark:border-zinc-600 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 transition-colors duration-200 cursor-pointer">
+                      <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-zinc-400">
+                        <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span className="text-sm font-medium">Click to upload image</span>
+                        <span className="text-xs">PNG, JPG, GIF up to 10MB</span>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                  
+                  <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1">
+                    Optional: Upload a company logo or related image
                   </p>
                 </div>
 

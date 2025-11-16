@@ -107,16 +107,16 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-20 bg-gray-50 dark:bg-zinc-900 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="contact" className="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-zinc-900 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            Get In <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Touch</span>
+            Contact Information
           </h2>
           <p className="text-xl text-gray-600 dark:text-zinc-400 max-w-3xl mx-auto">
-            Let's connect! Whether you have a project in mind, want to collaborate, or just want to say hello, I'd love to hear from you.
+            Open to discussing new opportunities, collaborations, and consulting projects. Let's connect and explore how we can work together.
           </p>
         </div>
 
@@ -126,10 +126,11 @@ const Contact = () => {
           <div className="space-y-8">
             <div>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                Let's Connect
+                Professional Contact
               </h3>
               <p className="text-gray-600 dark:text-zinc-400 mb-8 leading-relaxed">
-                I'm always open to discussing new opportunities, interesting projects, or just having a friendly chat about technology and development. Feel free to reach out through any of the channels below.
+                Available for full-time opportunities, freelance projects, and technical consulting. 
+                I respond to all inquiries within 24 hours during business days.
               </p>
             </div>
 
@@ -210,10 +211,10 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Drop me a line! 📩
+                    Send a Message
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-zinc-400">
-                    Let's turn your ideas into reality
+                    Fill out the form below to get in touch
                   </p>
                 </div>
               </div>
@@ -283,7 +284,7 @@ const Contact = () => {
                   required
                   rows={6}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white transition-colors duration-200 resize-none"
-                  placeholder="Hi Nitindeep! I'd love to discuss... 💭"
+                  placeholder="Hi Nitindeep! I'd love to discuss..."
                 />
               </div>
 
@@ -292,16 +293,15 @@ const Contact = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white py-4 rounded-xl font-medium hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 focus:ring-4 focus:ring-blue-500/50 transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none group"
+                  className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-4 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-100 focus:ring-4 focus:ring-gray-500/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center justify-center gap-3">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white dark:text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      <span>Launching your message...</span>
-                      <span className="text-lg">🚀</span>
+                      <span>Sending message...</span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-3">
@@ -309,7 +309,6 @@ const Contact = () => {
                       <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                       </svg>
-                      <span className="text-lg">✨</span>
                     </div>
                   )}
                 </button>

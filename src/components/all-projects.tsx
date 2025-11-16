@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { apiService } from '@/lib/api';
+import { Progress } from '@/components/ui/progress';
 
 interface Project {
   _id?: string;
@@ -159,9 +160,11 @@ const AllProjects = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-gray-600 dark:text-zinc-400 mt-4">Loading projects...</p>
+          <div className="text-center py-12 space-y-4">
+            <p className="text-gray-600 dark:text-zinc-400 mb-4">Loading projects...</p>
+            <div className="max-w-md mx-auto">
+              <Progress value={66} className="h-2 bg-gray-200 dark:bg-zinc-800" />
+            </div>
           </div>
         )}
 
