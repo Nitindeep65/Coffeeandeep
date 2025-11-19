@@ -97,7 +97,7 @@ const Hero = () => {
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 lg:py-20">
         
         {/* Relative Time Display at Top */}
-        <div className="mb-8">
+        <div className="mb-8" suppressHydrationWarning>
           <RelativeTime
             timeFormatOptions={{
               hour: '2-digit',

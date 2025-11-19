@@ -23,13 +23,13 @@
     --foreground: #fafafa;
     --border: #27272a;
     --ring: #71717a;
-    --sidebar: #18181b;
+    --sidebar: #000000;
     --sidebar-foreground: #fafafa;
     --sidebar-primary: #3b82f6;
     --sidebar-primary-foreground: #ffffff;
     --sidebar-accent: #27272a;
     --sidebar-accent-foreground: #fafafa;
-    --sidebar-border: #27272a;
+    --sidebar-border: #000000;
     --sidebar-ring: #3b82f6;
   }
 }
