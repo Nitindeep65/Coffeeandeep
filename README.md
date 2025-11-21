@@ -271,29 +271,6 @@ npm run start
 **📝 This project is for personal and educational use**
 
 Feel free to use it as inspiration for your own portfolio!
-
 </div>
-
-## 🌐 Connect With Me
-
-<div align="center">
-
-[![Portfolio](https://img.shields.io/badge/Portfolio-Visit_Live_Site-9400D3?style=for-the-badge&logo=google-chrome&logoColor=white)](https://coffeeandeep.vercel.app)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/singhdeep1/)
-[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Nitindeep65)
-[![Twitter](https://img.shields.io/badge/Twitter-Follow-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://x.com/_NitindeepSingh)
-[![Email](https://img.shields.io/badge/Email-Contact-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:nitindeepsingh@example.com)
-
-</div>
-
----
-
-<div align="center">
-
-### ⭐ **Star this repository if you found it helpful!** ⭐
-
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=18&duration=2000&pause=3000&color=A855F7&center=true&vCenter=true&width=600&lines=Built+with+❤️+using+Next.js+and+modern+web+technologies;Showcasing+the+future+of+web+development" alt="Footer Typing SVG" />
-
-**🚀 Ready to build something amazing? Let's connect and create the future together!**
 
 </div>
