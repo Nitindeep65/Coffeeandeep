@@ -9,7 +9,7 @@ export async function GET() {
     await connectDB();
     
     const projects = await Project.find({})
-      .sort({ createdAt: -1 })
+      .sort({ order: 1 })
       .lean();
     
     // Debug: Log what we're returning
