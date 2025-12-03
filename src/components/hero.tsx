@@ -9,7 +9,7 @@ import {
   RelativeTimeZoneLabel, 
   RelativeTimeZoneDisplay 
 } from '@/components/ui/shadcn-io/relative-time';
-
+import Link from 'next/link';
 const Hero = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -141,12 +141,13 @@ const Hero = () => {
               >
                 View Projects
               </button>
+              <Link href="https://calendly.com/nitindeep65/30min">
               <button 
-                onClick={() => handleSmoothScroll('contact')}
-                className="border-2 border-gray-900 dark:border-white text-gray-900 dark:text-white hover:bg-gray-900 hover:text-white dark:hover:bg-white dark:hover:text-gray-900 px-6 sm:px-8 py-3 rounded-lg font-medium transition-all duration-200 text-center"
+                className="border bg-blue-700 dark:border-white  text-white dark:text-white hover:bg-blue-800 hover:text-white dark:hover:bg-blue-500 dark:hover:text-white px-16 sm:px-8 py-3 rounded-lg font-medium transition-all duration-200 text-center"
               >
-                Get in Touch
+                Book a Call on Calendly
               </button>
+              </Link>
               
               {/* CV Buttons Row */}
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -220,39 +221,24 @@ const Hero = () => {
                 )}
               </div>
             </div>
-            
-            {/* Skills/Technologies */}
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wide">
-                Core Technologies
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {['React', 'Next.js', 'TypeScript', 'Node.js', 'MongoDB', 'PostgreSQL', 'Docker', 'AWS'].map((tech) => (
-                  <span 
-                    key={tech}
-                    className="px-3 py-1.5 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white text-sm font-medium border border-gray-300 dark:border-zinc-700 rounded"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </div>
           </div>
           
           {/* Right Side - Profile Image with Pixel Effect */}
           <div className="flex justify-center lg:justify-end order-1 lg:order-2">
             <div className="relative">
-              {/* Image container with pixel animation */}
-              <div className="relative bg-white dark:bg-zinc-900 p-4 rounded-2xl border-2 border-gray-300 dark:border-zinc-700 shadow-2xl">
-                <PixelImage
-                  src="/image/pic.jpeg"
-                  grid="8x8"
-                  grayscaleAnimation={true}
-                  pixelFadeInDuration={800}
-                  maxAnimationDelay={1500}
-                  colorRevealDelay={1600}
-                  showReplayButton={false}
-                />
+              {/* Image container with pixel animation (circular on mobile, rounded-2xl on lg) */}
+              <div className="relative bg-white dark:bg-zinc-900 p-4 rounded-full lg:rounded-2xl border-2 border-gray-300 dark:border-zinc-700 shadow-2xl w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 lg:w-auto lg:h-auto overflow-hidden flex items-center justify-center">
+                <div className="w-full h-full flex items-center justify-center translate-y-9 lg:translate-y-0">
+                  <PixelImage
+                    src="/image/pic.jpeg"
+                    grid="8x8"
+                    grayscaleAnimation={true}
+                    pixelFadeInDuration={800}
+                    maxAnimationDelay={1500}
+                    colorRevealDelay={1600}
+                    showReplayButton={false}
+                  />
+                </div>
               </div>
               
               {/* Decorative elements */}
