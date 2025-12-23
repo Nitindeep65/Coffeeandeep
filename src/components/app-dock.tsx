@@ -27,6 +27,20 @@ const socialLinks = [
 
 export function AppDock() {
   const [activeSection, setActiveSection] = React.useState('home');
+  const [isDesktop, setIsDesktop] = React.useState(false);
+
+  React.useEffect(() => {
+    // Set initial value
+    setIsDesktop(window.innerWidth >= 768);
+
+    // Handle resize
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -70,10 +84,10 @@ export function AppDock() {
   return (
     <div className="fixed bottom-3 md:bottom-6 left-1/2 -translate-x-1/2 z-50 w-fit">
       <Dock 
-        magnification={window.innerWidth >= 768 ? 70 : 45} 
-        distance={window.innerWidth >= 768 ? 140 : 80}
-        panelHeight={window.innerWidth >= 768 ? 64 : 46}
-        className="shadow-xl border  dark:border-neutral-700 px-1.5 md:px-4 gap-1 md:gap-3 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl"
+        magnification={isDesktop ? 70 : 45} 
+        distance={isDesktop ? 140 : 80}
+        panelHeight={isDesktop ? 64 : 46}
+        className="shadow-xl border dark:border-neutral-700 px-1.5 md:px-4 gap-1 md:gap-3 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl"
       >
         {navigationItems.map((item) => {
           const isActive = activeSection === item.url.replace('#', '');
