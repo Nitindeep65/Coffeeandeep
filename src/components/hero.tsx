@@ -141,9 +141,9 @@ const Hero = () => {
               >
                 View Projects
               </button>
-              <Link href="https://calendly.com/nitindeep65/30min">
+              <Link href="https://calendly.com/nitindeep65/30min" className="w-full sm:w-auto">
               <button 
-                className="border bg-blue-700 dark:border-white  text-white dark:text-white hover:bg-blue-800 hover:text-white dark:hover:bg-blue-500 dark:hover:text-white px-16 sm:px-8 py-3 rounded-lg font-medium transition-all duration-200 text-center"
+                className="border bg-blue-700 dark:border-white text-white dark:text-white hover:bg-blue-800 hover:text-white dark:hover:bg-blue-500 dark:hover:text-white px-6 sm:px-8 py-3 rounded-lg font-medium transition-all duration-200 text-center w-full"
               >
                 Book a Call on Calendly
               </button>
