@@ -128,7 +128,7 @@ const Hero = () => {
           {/* Left Side - Image and Description */}
           <div className="space-y-8">
             {/* Profile Image */}
-            <div className="relative aspect-[4/5] max-w-md overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900">
+            <div className="relative aspect-[4/4] max-w-md overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900">
               <div className="w-full h-full">
                 <PixelImage
                   src="/image/pic.jpeg"
