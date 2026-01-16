@@ -128,7 +128,7 @@ const Hero = () => {
           {/* Left Side - Image and Description */}
           <div className="space-y-6">
             {/* Profile Image */}
-            <div className="relative max-w-md">
+            <div>
               <PixelImage
                 src="/image/pic.jpeg"
                 grid="8x8"
@@ -141,7 +141,7 @@ const Hero = () => {
             </div>
             
             {/* About Me */}
-            <div className="max-w-md">
+            <div className="w-72 md:w-96">
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 Nitindeep Singh
               </h3>
@@ -216,12 +216,12 @@ const Hero = () => {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mt-8 sm:mt-12">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 mt-8 sm:mt-12">
               <Link href="https://calendly.com/nitindeep65/30min" className="w-full sm:w-auto">
-                <button className="w-full sm:w-auto group border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white px-6 sm:px-10 py-4 sm:py-5 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 flex items-center justify-center gap-2">
+                <button className="w-full sm:w-auto group border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 flex items-center justify-center gap-2">
                   Get Started
                   <svg 
-                    className="w-4 h-4 transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" 
+                    className="w-3 h-3 sm:w-4 sm:h-4 transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
@@ -232,8 +232,8 @@ const Hero = () => {
               </Link>
 
               <Link href="https://calendly.com/nitindeep65/30min" className="w-full sm:w-auto">
-                <button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-10 py-4 sm:py-5 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 flex items-center justify-center gap-2">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 flex items-center justify-center gap-2">
+                  <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <span className="hidden xs:inline">Book a Call on Calendly</span>
@@ -243,9 +243,9 @@ const Hero = () => {
 
               <button 
                 onClick={handleDownloadCV}
-                className="w-full sm:w-auto border-2 border-gray-300 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 px-6 sm:px-10 py-4 sm:py-5 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto border-2 border-gray-300 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 flex items-center justify-center gap-2"
               >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 Download CV
