@@ -87,7 +87,7 @@ export function AppDock() {
         magnification={isDesktop ? 70 : 45} 
         distance={isDesktop ? 140 : 80}
         panelHeight={isDesktop ? 64 : 46}
-        className="shadow-xl border dark:border-neutral-700 px-1.5 md:px-4 gap-1 md:gap-3 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl"
+        className="shadow-xl border border-gray-200 dark:border-gray-700 px-1.5 md:px-4 gap-1 md:gap-3 bg-black dark:bg-white backdrop-blur-xl"
       >
         {navigationItems.map((item) => {
           const isActive = activeSection === item.url.replace('#', '');
@@ -100,8 +100,8 @@ export function AppDock() {
                   onClick={(e) => handleSmoothScroll(e, item.url)}
                   className={`flex items-center justify-center w-full h-full rounded-md md:rounded-lg transition-colors ${
                     isActive 
-                      ? 'bg-gray-900 dark:bg-white text-white dark:text-black' 
-                      : 'hover:bg-gray-200 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-300'
+                      ? 'bg-white dark:bg-black text-black dark:text-white' 
+                      : 'hover:bg-white/20 dark:hover:bg-black/20 text-white dark:text-black'
                   }`}
                 >
                   <item.icon className="w-4 h-4 md:w-5 md:h-5" />
@@ -112,7 +112,7 @@ export function AppDock() {
         })}
         
         {/* Separator */}
-        <div className="w-px h-6 md:h-8 bg-gray-300 dark:bg-neutral-700" />
+        <div className="w-px h-6 md:h-8 bg-white/30 dark:bg-black/30" />
         
         {socialLinks.map((link) => (
           <DockItem key={link.title}>
@@ -122,7 +122,7 @@ export function AppDock() {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-full h-full rounded-md md:rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-300 transition-colors"
+                className="flex items-center justify-center w-full h-full rounded-md md:rounded-lg hover:bg-white/20 dark:hover:bg-black/20 text-white dark:text-black transition-colors"
               >
                 <link.icon className="w-4 h-4 md:w-5 md:h-5" />
               </a>

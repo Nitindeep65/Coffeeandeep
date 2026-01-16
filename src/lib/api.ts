@@ -155,6 +155,49 @@ class ApiService {
     });
   }
 
+  // Blog methods
+  async getBlogs() {
+    return this.request('/blog');
+  }
+
+  async getBlog(id: string) {
+    return this.request(`/blog/${id}`);
+  }
+
+  async createBlog(blogData: any) {
+    if (blogData instanceof FormData) {
+      return this.request('/blog', {
+        method: 'POST',
+        body: blogData,
+      });
+    }
+    
+    return this.request('/blog', {
+      method: 'POST',
+      body: JSON.stringify(blogData),
+    });
+  }
+
+  async updateBlog(id: string, blogData: any) {
+    if (blogData instanceof FormData) {
+      return this.request(`/blog/${id}`, {
+        method: 'PUT',
+        body: blogData,
+      });
+    }
+    
+    return this.request(`/blog/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(blogData),
+    });
+  }
+
+  async deleteBlog(id: string) {
+    return this.request(`/blog/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
   // File upload methods
   async uploadCV(file: File) {
     const formData = new FormData();

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { apiService } from '@/lib/api';
 import { Progress } from '@/components/ui/progress';
-import { AnimatedTestimonials, type Testimonial } from '@/components/ui/shadcn-io/animated-testimonials';
 import { Terminal, AnimatedSpan, TypingAnimation } from '@/components/ui/shadcn-io/terminal';
 
 interface Experience {
@@ -243,23 +242,28 @@ const About = () => {
 
         {/* Work Experience Section */}
         <div className="mt-20">
-          <div className="flex items-center justify-between mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
               Professional Experience
             </h3>
             
-            {/* Add Experience Button - Only in Development */}
-            {process.env.NODE_ENV === 'development' && (
-              <button
-                onClick={() => setShowAddExperienceForm(true)}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                + Add Experience
+            <div className="flex items-center gap-3">
+              {/* Add Experience Button - Only in Development */}
+              {process.env.NODE_ENV === 'development' && (
+                <button
+                  onClick={() => setShowAddExperienceForm(true)}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
+                >
+                  + Add
+                </button>
+              )}
+              <button className="text-gray-900 dark:text-white border border-gray-300 dark:border-zinc-700 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-900 transition-all duration-200 text-sm font-medium">
+                View all
               </button>
-            )}
+            </div>
           </div>
 
-          {/* Experience with Animated Testimonials */}
+          {/* Experience List */}
           {loading ? (
             <div className="text-center py-12 space-y-4">
               <p className="text-gray-600 dark:text-zinc-400 mb-4">Loading experiences...</p>
@@ -284,25 +288,60 @@ const About = () => {
               )}
             </div>
           ) : (
-            <>
-              <AnimatedTestimonials
-                autoplay={true}
-                testimonials={experiences.map((experience, idx): Testimonial => ({
-                  quote: experience.description,
-                  name: experience.title,
-                  designation: `${experience.company} • ${experience.duration} • ${experience.location}`,
-                  src: experience.imageUrl || 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=400&fit=crop',
-                }))}
-              />
-              
-              {/* Edit Experience Controls - Only in Development */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="mt-8 flex flex-wrap gap-3 justify-center">
-                  {experiences.map((experience) => (
-                    <div key={experience._id || experience.id} className="flex gap-2 items-center bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-lg p-3">
-                      <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 truncate max-w-[200px]">
+            <div className="space-y-2">
+              {experiences.map((experience) => (
+                <div 
+                  key={experience._id || experience.id}
+                  className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors duration-200 group"
+                >
+                  {/* Avatar */}
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-zinc-200 dark:bg-zinc-800 flex-shrink-0">
+                    {experience.imageUrl ? (
+                      <img
+                        src={experience.imageUrl}
+                        alt={experience.company}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">
                         {experience.title}
+                      </h4>
+                      <span className="text-gray-600 dark:text-zinc-400">
+                        {experience.company} • {experience.location} 💼
                       </span>
+                    </div>
+                    <p className="text-gray-600 dark:text-zinc-400 mt-1 text-sm leading-relaxed line-clamp-2">
+                      {experience.description}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xs text-gray-500 dark:text-zinc-500">
+                        {experience.duration}
+                      </span>
+                      {experience.technologies && experience.technologies.slice(0, 3).map((tech, idx) => (
+                        <span 
+                          key={idx}
+                          className="text-xs bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 px-2 py-0.5 rounded"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Edit/Delete Controls - Only in Development */}
+                  {process.env.NODE_ENV === 'development' && (
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => openEditExperienceForm(experience)}
                         className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 p-1.5 rounded transition-colors duration-200"
@@ -322,10 +361,10 @@ const About = () => {
                         </svg>
                       </button>
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-            </>
+              ))}
+            </div>
           )}
         </div>
 

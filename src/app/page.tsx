@@ -2,6 +2,7 @@ import Hero from "@/components/hero";
 import About from "@/components/about";
 import Projects from "@/components/projects";
 import Contact from "@/components/contact";
+import Blog from "@/components/blog";
 import { AppDock } from "@/components/app-dock";
 
 export default function Home() {
@@ -11,6 +12,7 @@ export default function Home() {
         <Hero />
         <Projects />
         <About />
+         <Blog />
         <Contact />
       </main>
       <AppDock />
