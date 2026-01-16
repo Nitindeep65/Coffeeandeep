@@ -126,9 +126,9 @@ const Hero = () => {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
           
           {/* Left Side - Image and Description */}
-          <div className="space-y-6">
+          <div className="hero-profile-section flex flex-col lg:flex-col items-center lg:items-start gap-6">
             {/* Profile Image */}
-            <div>
+            <div className="hero-profile-image w-full max-w-xs lg:max-w-[420px] shrink-0">
               <PixelImage
                 src="/image/pic.jpeg"
                 grid="8x8"
@@ -141,11 +141,11 @@ const Hero = () => {
             </div>
             
             {/* About Me */}
-            <div className="w-72 md:w-96">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <div className="hero-profile-text w-full max-w-xs lg:max-w-[420px] text-center lg:text-left">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 Nitindeep Singh
               </h3>
-              <p className="text-gray-600 dark:text-zinc-400 leading-relaxed text-sm">
+              <p className="text-gray-600 dark:text-zinc-400 leading-relaxed text-sm sm:text-base">
                 Full-stack developer passionate about building modern web applications. 
                 I specialize in React, Next.js, Node.js, and cloud technologies. 
                 Currently open to freelance projects and exciting opportunities.

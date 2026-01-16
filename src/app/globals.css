@@ -59,3 +59,41 @@ body {
     background: #52525b;
   }
 }
+
+/* Hero profile section - side by side layout for 591px to 1022px */
+@media (min-width: 591px) and (max-width: 1022px) {
+  .hero-profile-section {
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    gap: 1.5rem !important;
+  }
+  
+  .hero-profile-image {
+    max-width: 280px !important;
+    width: 280px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .hero-profile-text {
+    text-align: left !important;
+    max-width: none !important;
+    width: 100% !important;
+    flex: 1 !important;
+  }
+}
+
+/* Below 591px - stacked layout */
+@media (max-width: 590px) {
+  .hero-profile-section {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  
+  .hero-profile-image {
+    max-width: 280px !important;
+  }
+  
+  .hero-profile-text {
+    text-align: center !important;
+  }
+}
