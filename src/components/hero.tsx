@@ -11,7 +11,7 @@ import {
 import Link from 'next/link';
 
 const Hero = () => {
-  const [activeService, setActiveService] = useState(0);
+  const [hoveredService, setHoveredService] = useState<number | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -126,9 +126,9 @@ const Hero = () => {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
           
           {/* Left Side - Image and Description */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Profile Image */}
-            <div className="relative aspect-[4/4] max-w-md overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900">
+            <div className="relative aspect-[4/4] max-w-md overflow-hidden rounded-lg">
               <div className="w-full h-full">
                 <PixelImage
                   src="/image/pic.jpeg"
@@ -141,14 +141,16 @@ const Hero = () => {
                 />
               </div>
             </div>
-
-            {/* Category Label */}
-            <div>
-              <p className="text-xs font-medium tracking-widest text-gray-500 dark:text-zinc-500 uppercase mb-4">
-                {services[activeService].title}
-              </p>
-              <p className="text-gray-600 dark:text-zinc-400 leading-relaxed max-w-md">
-                {services[activeService].description}
+            
+            {/* About Me */}
+            <div className="max-w-md">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Nitindeep Singh
+              </h3>
+              <p className="text-gray-600 dark:text-zinc-400 leading-relaxed text-sm">
+                Full-stack developer passionate about building modern web applications. 
+                I specialize in React, Next.js, Node.js, and cloud technologies. 
+                Currently open to freelance projects and exciting opportunities.
               </p>
             </div>
           </div>
@@ -156,36 +158,63 @@ const Hero = () => {
           {/* Right Side - Services List */}
           <div className="flex flex-col justify-between">
             <div className="space-y-0">
-              {services.map((service, index) => (
-                <div
-                  key={index}
-                  onMouseEnter={() => setActiveService(index)}
-                  className={`group cursor-pointer border-b border-gray-200 dark:border-zinc-800 py-4 transition-all duration-300 ${
-                    activeService === index ? '' : ''
-                  }`}
-                >
-                  <div className="flex items-baseline justify-between">
-                    <h2 
-                      className={`text-3xl sm:text-4xl lg:text-5xl font-light transition-colors duration-300 ${
-                        activeService === index 
-                          ? 'text-gray-900 dark:text-white' 
-                          : 'text-gray-300 dark:text-zinc-700 group-hover:text-gray-600 dark:group-hover:text-zinc-400'
+              {services.map((service, index) => {
+                const isHovered = hoveredService === index;
+                return (
+                  <div
+                    key={index}
+                    onMouseEnter={() => setHoveredService(index)}
+                    onMouseLeave={() => setHoveredService(null)}
+                    className="group cursor-pointer border-b border-gray-200 dark:border-zinc-800 -my-2 transition-all duration-200"
+                  >
+                    {/* Service Title Row */}
+                    <div className="flex items-baseline justify-between">
+                      <h2 
+                        className={`text-2xl sm:text-3xl lg:text-4xl font-light transition-colors duration-200 ${
+                          isHovered 
+                            ? 'text-gray-900 dark:text-white' 
+                            : 'text-gray-400 dark:text-zinc-600 group-hover:text-gray-700 dark:group-hover:text-zinc-300'
+                        }`}
+                      >
+                        {service.title}
+                      </h2>
+                      <div className="flex items-center gap-2">
+                        <span 
+                          className={`text-sm font-mono transition-all duration-200 ${
+                            isHovered 
+                              ? 'text-red-500' 
+                              : 'text-gray-300 dark:text-zinc-700 group-hover:text-red-400'
+                          }`}
+                        >
+                          0{index + 1}
+                        </span>
+                        <span 
+                          className={`text-sm transition-all duration-200 ${
+                            isHovered 
+                              ? 'text-red-500 translate-x-1' 
+                              : 'text-gray-300 dark:text-zinc-700 group-hover:text-red-400 group-hover:translate-x-0.5'
+                          } transform`}
+                        >
+                          →
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Dropdown Description */}
+                    <div 
+                      className={`overflow-hidden transition-all duration-300 ease-out ${
+                        isHovered 
+                          ? 'max-h-32 opacity-100 translate-y-0 mt-3' 
+                          : 'max-h-0 opacity-0 -translate-y-2 mt-0'
                       }`}
                     >
-                      {service.title}
-                    </h2>
-                    <span 
-                      className={`text-sm font-medium transition-colors duration-300 ${
-                        activeService === index 
-                          ? 'text-red-500' 
-                          : 'text-gray-300 dark:text-zinc-700 group-hover:text-red-400'
-                      }`}
-                    >
-                      {`{0${index + 1}}`}
-                    </span>
+                      <p className="text-sm sm:text-base text-gray-600 dark:text-zinc-400 leading-relaxed pr-8">
+                        {service.description}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* CTA Buttons */}
