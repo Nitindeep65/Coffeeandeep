@@ -30,8 +30,8 @@ const Hero = () => {
       description: 'Designing robust APIs and server-side solutions using Node.js, Express, and MongoDB. Building secure, scalable backend architectures.'
     },
     {
-      title: 'UI/UX Implementation',
-      description: 'Translating designs into pixel-perfect code. Working closely with design systems to create consistent and delightful user interfaces.'
+      title: 'Freelancer',
+      description: 'Available for freelance projects and collaborations. Delivering high-quality solutions with flexible engagement models, transparent communication, and on-time delivery.'
     },
     {
       title: 'Cloud & DevOps',
