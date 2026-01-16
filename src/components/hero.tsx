@@ -171,7 +171,7 @@ const Hero = () => {
                         className={`text-2xl sm:text-3xl lg:text-4xl font-light transition-colors duration-200 ${
                           isHovered 
                             ? 'text-gray-900 dark:text-white' 
-                            : 'text-gray-400 dark:text-zinc-600 group-hover:text-gray-700 dark:group-hover:text-zinc-300'
+                            : 'text-gray-500 dark:text-zinc-600 group-hover:text-gray-700 dark:group-hover:text-zinc-300'
                         }`}
                       >
                         {service.title}
@@ -181,7 +181,7 @@ const Hero = () => {
                           className={`text-sm font-mono transition-all duration-200 ${
                             isHovered 
                               ? 'text-red-500' 
-                              : 'text-gray-300 dark:text-zinc-700 group-hover:text-red-400'
+                              : 'text-gray-400 dark:text-zinc-700 group-hover:text-red-400'
                           }`}
                         >
                           0{index + 1}
@@ -190,7 +190,7 @@ const Hero = () => {
                           className={`text-sm transition-all duration-200 ${
                             isHovered 
                               ? 'text-red-500 translate-x-1' 
-                              : 'text-gray-300 dark:text-zinc-700 group-hover:text-red-400 group-hover:translate-x-0.5'
+                              : 'text-gray-400 dark:text-zinc-700 group-hover:text-red-400 group-hover:translate-x-0.5'
                           } transform`}
                         >
                           →
