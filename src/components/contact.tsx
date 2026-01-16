@@ -29,9 +29,6 @@ const formSchema = z.object({
   message: z.string().min(10, {
     message: 'Message must be at least 10 characters.',
   }),
-  agreeToTerms: z.boolean().refine((val) => val === true, {
-    message: 'You must agree to the terms.',
-  }),
 });
 
 const Contact = () => {
@@ -46,7 +43,6 @@ const Contact = () => {
       email: '',
       company: '',
       message: '',
-      agreeToTerms: false,
     },
   });
 
@@ -292,37 +288,6 @@ const Contact = () => {
                         />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Terms Checkbox */}
-                <FormField
-                  control={form.control}
-                  name="agreeToTerms"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 pt-2">
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          checked={field.value}
-                          onChange={field.onChange}
-                          className="w-4 h-4 mt-0.5 text-gray-900 dark:text-white bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel className="text-sm text-gray-600 dark:text-zinc-400 font-normal">
-                          I agree to the{' '}
-                          <a href="#" className="text-gray-900 dark:text-white hover:underline font-medium">
-                            Terms of Service
-                          </a>
-                          {' '}and{' '}
-                          <a href="#" className="text-gray-900 dark:text-white hover:underline font-medium">
-                            Privacy Policy
-                          </a>
-                        </FormLabel>
-                        <FormMessage />
-                      </div>
                     </FormItem>
                   )}
                 />
