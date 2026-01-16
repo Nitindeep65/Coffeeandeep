@@ -163,7 +163,7 @@ const Hero = () => {
                     key={index}
                     onMouseEnter={() => setHoveredService(index)}
                     onMouseLeave={() => setHoveredService(null)}
-                    className="group cursor-pointer border-b border-gray-200 dark:border-zinc-800 -my-2 transition-all duration-200"
+                    className="group cursor-pointer border-b border-gray-200 dark:border-zinc-800 py-3 transition-all duration-200"
                   >
                     {/* Service Title Row */}
                     <div className="flex items-baseline justify-between">
