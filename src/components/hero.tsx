@@ -128,18 +128,16 @@ const Hero = () => {
           {/* Left Side - Image and Description */}
           <div className="space-y-6">
             {/* Profile Image */}
-            <div className="relative aspect-[4/4] max-w-md overflow-hidden rounded-lg">
-              <div className="w-full h-full">
-                <PixelImage
-                  src="/image/pic.jpeg"
-                  grid="8x8"
-                  grayscaleAnimation={true}
-                  pixelFadeInDuration={800}
-                  maxAnimationDelay={1500}
-                  colorRevealDelay={1600}
-                  showReplayButton={false}
-                />
-              </div>
+            <div className="relative max-w-md">
+              <PixelImage
+                src="/image/pic.jpeg"
+                grid="8x8"
+                grayscaleAnimation={true}
+                pixelFadeInDuration={800}
+                maxAnimationDelay={1500}
+                colorRevealDelay={1600}
+                showReplayButton={false}
+              />
             </div>
             
             {/* About Me */}
