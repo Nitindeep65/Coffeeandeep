@@ -62,7 +62,7 @@ The key is not to view AI as a replacement for human intelligence, but as an amp
     author: 'Nitindeep Singh',
     authorRole: 'Software Engineer',
     authorImage: '/image/profile.jpg',
-    coverImage: '/image/ai-blog.jpg',
+    coverImage: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80',
     category: 'AI',
     tags: ['AI', 'Business', 'Technology'],
     featured: true,
@@ -123,7 +123,7 @@ Scale resources based on demand rather than peak capacity.
 The cloud journey is a marathon, not a sprint. Take it step by step, learn continuously, and optimize as you go.`,
     author: 'Nitindeep Singh',
     authorRole: 'Software Engineer',
-    coverImage: '/image/cloud.jpg',
+    coverImage: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&q=80',
     category: 'Cloud',
     tags: ['Cloud', 'Migration', 'AWS', 'Azure', 'DevOps'],
     featured: false,
@@ -194,7 +194,7 @@ Technology alone isn't enough. Create a security-conscious culture where:
 Remember: Security is a journey, not a destination. Stay vigilant, stay adaptive.`,
     author: 'Nitindeep Singh',
     authorRole: 'Software Engineer',
-    coverImage: '/image/security.jpg',
+    coverImage: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80',
     category: 'Security',
     tags: ['Security', 'Remote Work', 'Zero Trust', 'Cybersecurity'],
     featured: false,
@@ -264,7 +264,7 @@ As 5G networks roll out and edge hardware becomes more powerful, fog computing w
 The smart cities of tomorrow are being built today, one fog node at a time.`,
     author: 'Nitindeep Singh',
     authorRole: 'Software Engineer',
-    coverImage: '/image/iot.jpg',
+    coverImage: 'https://images.unsplash.com/photo-1558346490-a72e53ae2d4f?w=800&q=80',
     category: 'IoT',
     tags: ['IoT', 'Smart Cities', 'Edge Computing', 'Fog Computing'],
     featured: false,
@@ -361,7 +361,7 @@ As the technology matures and standards emerge, blockchain will become invisible
 The future supply chain is transparent, automated, and trustworthy. Blockchain makes it possible.`,
     author: 'Nitindeep Singh',
     authorRole: 'Software Engineer',
-    coverImage: '/image/blockchain.jpg',
+    coverImage: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&q=80',
     category: 'Blockchain',
     tags: ['Blockchain', 'Supply Chain', 'DLT', 'Enterprise'],
     featured: false,
@@ -371,44 +371,26 @@ The future supply chain is transparent, automated, and trustworthy. Blockchain m
 ];
 
 // Pixelated/Dotted Image Component
-const DottedImage = ({ alt }: { src: string; alt: string }) => {
+const DottedImage = ({ src, alt }: { src: string; alt: string }) => {
   return (
-    <div className="relative w-full h-full bg-zinc-900 overflow-hidden rounded-lg flex items-center justify-center">
-      {/* Dotted pattern - CSS based for performance */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: `
-            radial-gradient(circle at 50% 50%, transparent 0%, #18181b 70%),
-            radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)
-          `,
-          backgroundSize: '100% 100%, 6px 6px',
-          backgroundPosition: 'center, center'
-        }}
-      />
-      {/* Central elliptical dot cluster */}
-      <div 
-        className="relative w-3/4 h-2/3 rounded-full"
-        style={{
-          background: 'radial-gradient(circle, rgba(255,255,255,0.6) 1.5px, transparent 1.5px)',
-          backgroundSize: '8px 8px',
-          filter: 'blur(0.3px)'
-        }}
+    <div className="relative w-full h-full bg-zinc-100 dark:bg-zinc-900 overflow-hidden rounded-lg">
+      <img 
+        src={src} 
+        alt={alt}
+        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
       />
     </div>
   );
 };
 
-// Small thumbnail with dotted effect
-const DottedThumbnail = () => {
+// Small thumbnail with actual image
+const DottedThumbnail = ({ src, alt }: { src: string; alt: string }) => {
   return (
-    <div className="w-20 h-14 bg-zinc-800 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
-      <div 
-        className="w-12 h-8 rounded-full"
-        style={{
-          background: 'radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px)',
-          backgroundSize: '4px 4px'
-        }}
+    <div className="w-20 h-14 bg-zinc-200 dark:bg-zinc-800 rounded-md overflow-hidden flex-shrink-0">
+      <img 
+        src={src} 
+        alt={alt}
+        className="w-full h-full object-cover"
       />
     </div>
   );
@@ -607,7 +589,10 @@ const Blog = () => {
                   className="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors duration-200 cursor-pointer group"
                 >
                   {/* Thumbnail */}
-                  <DottedThumbnail />
+                  <DottedThumbnail 
+                    src={blog.coverImage || '/image/placeholder.jpg'} 
+                    alt={blog.title}
+                  />
                   
                   {/* Blog Title */}
                   <div className="flex-1 min-w-0">
