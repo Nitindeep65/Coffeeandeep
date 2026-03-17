@@ -81,6 +81,7 @@ const AllProjects = () => {
       githubUrl: '',
       liveUrl: '',
       category: 'Frontend',
+      order: projects.length + 1,
       imageFile: null,
       imagePreview: ''
     });
