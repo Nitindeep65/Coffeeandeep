@@ -41,6 +41,7 @@ export async function PUT(
         liveUrl: formData.get('liveUrl'),
         category: formData.get('category'),
         featured: formData.get('featured'),
+        order: formData.get('order') ? parseInt(formData.get('order') as string) : 999,
       };
 
       // Handle image upload

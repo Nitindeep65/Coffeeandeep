@@ -18,6 +18,7 @@ interface Project {
   liveUrl: string;
   imageUrl: string;
   category: string;
+  order: number;
 }
 
 const Projects = () => {
@@ -61,6 +62,7 @@ const Projects = () => {
     githubUrl: '',
     liveUrl: '',
     category: 'Frontend',
+    order: 999,
     imageFile: null as File | null,
     imagePreview: ''
   });
@@ -102,6 +104,7 @@ const Projects = () => {
       githubUrl: project.githubUrl,
       liveUrl: project.liveUrl,
       category: project.category,
+      order: project.order || 999,
       imageFile: null,
       imagePreview: ''
     });
@@ -166,7 +169,8 @@ const Projects = () => {
         technologies: newProject.technologies.split(',').map(tech => tech.trim()),
         githubUrl: newProject.githubUrl,
         liveUrl: newProject.liveUrl,
-        category: newProject.category
+        category: newProject.category,
+        order: newProject.order
       };
 
       if (editingProject) {
@@ -179,6 +183,7 @@ const Projects = () => {
         formData.append('githubUrl', newProject.githubUrl);
         formData.append('liveUrl', newProject.liveUrl);
         formData.append('category', newProject.category);
+        formData.append('order', newProject.order.toString());
         
         if (newProject.imageFile) {
           formData.append('image', newProject.imageFile);
@@ -621,6 +626,25 @@ const Projects = () => {
                   </select>
                 </div>
 
+                {/* Order */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                    Display Order
+                  </label>
+                  <input
+                    type="number"
+                    name="order"
+                    value={newProject.order}
+                    onChange={handleInputChange}
+                    min="1"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                    placeholder="Enter display order (1 = first)"
+                  />
+                  <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">
+                    Lower numbers appear first (1 = first position)
+                  </p>
+                </div>
+
                 {/* Project Image */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
@@ -841,6 +865,26 @@ const Projects = () => {
                     <option value="AI/ML">AI/ML</option>
                     <option value="DevOps">DevOps</option>
                   </select>
+                </div>
+
+                {/* Order */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                    Display Order *
+                  </label>
+                  <input
+                    type="number"
+                    name="order"
+                    value={newProject.order}
+                    onChange={handleInputChange}
+                    min="1"
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                    placeholder="Enter display order (1 = first)"
+                  />
+                  <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">
+                    Lower numbers appear first (1 = first position)
+                  </p>
                 </div>
 
                 {/* Project Image */}

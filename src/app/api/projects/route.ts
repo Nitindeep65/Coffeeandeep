@@ -121,7 +121,8 @@ export async function POST(request: NextRequest) {
       liveUrl,
       category: category || 'Frontend',
       imageUrl: imageUrl || projectData.imageUrl || null,
-      featured: projectData.featured || false
+      featured: projectData.featured || false,
+      order: projectData.order || 999
     });
     
     const savedProject = await newProject.save();

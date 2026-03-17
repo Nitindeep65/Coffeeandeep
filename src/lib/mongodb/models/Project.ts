@@ -10,6 +10,7 @@ export interface IProject extends Document {
   imageUrl?: string;
   category: string;
   featured: boolean;
+  order: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -76,6 +77,11 @@ const ProjectSchema = new Schema<IProject>({
   featured: {
     type: Boolean,
     default: false
+  },
+  order: {
+    type: Number,
+    default: 999,
+    min: [1, 'Order must be at least 1']
   }
 }, {
   timestamps: true
@@ -85,5 +91,6 @@ const ProjectSchema = new Schema<IProject>({
 ProjectSchema.index({ createdAt: -1 });
 ProjectSchema.index({ featured: -1 });
 ProjectSchema.index({ category: 1 });
+ProjectSchema.index({ order: 1 });
 
 export default mongoose.models.Project || mongoose.model<IProject>('Project', ProjectSchema);
