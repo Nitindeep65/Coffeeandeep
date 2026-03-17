@@ -89,6 +89,7 @@ const Projects = () => {
       githubUrl: '',
       liveUrl: '',
       category: 'Frontend',
+      order: projects.length + 1,
       imageFile: null,
       imagePreview: ''
     });
@@ -122,6 +123,7 @@ const Projects = () => {
       githubUrl: '',
       liveUrl: '',
       category: 'Frontend',
+      order: projects.length + 1,
       imageFile: null,
       imagePreview: ''
     });
@@ -216,7 +218,8 @@ const Projects = () => {
         technologies: '',
         githubUrl: '',
         liveUrl: '',
-        category: '',
+        category: 'Frontend',
+        order: projects.length + 1,
         imageFile: null,
         imagePreview: ''
       });
