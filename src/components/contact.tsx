@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { motion } from 'framer-motion';
 import {
   Form,
   FormControl,
@@ -14,6 +15,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
+import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/motion-wrapper';
+import { Send, CheckCircle, AlertCircle } from 'lucide-react';
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -131,48 +134,57 @@ const Contact = () => {
   }
 
   return (
-    <section id="contact" className="py-12 sm:py-16 lg:py-20 bg-white dark:bg-black transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+    <section id="contact" className="relative py-12 sm:py-16 lg:py-20 bg-white dark:bg-black transition-colors duration-300 overflow-hidden">
+      {/* Background accent */}
+      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-gradient-to-tl from-blue-500/5 via-purple-500/3 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         
         {/* Section Header */}
-        <div className="text-center mb-12 lg:mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            Contact Us
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-zinc-400 max-w-2xl mx-auto">
-            Ready to start your next project? Our team is here to help you succeed. Reach out and let's discuss how we can bring your ideas to life.
-          </p>
-        </div>
+        <ScrollReveal direction="up">
+          <div className="text-center mb-12 lg:mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+              Contact Us
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-zinc-400 max-w-2xl mx-auto">
+              Ready to start your next project? Our team is here to help you succeed. Reach out and let's discuss how we can bring your ideas to life.
+            </p>
+          </div>
+        </ScrollReveal>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
           
           {/* Contact Methods - Left Side */}
-          <div className="space-y-1">
+          <StaggerContainer staggerDelay={0.1} className="space-y-1">
             {contactMethods.map((method, index) => (
-              <a
-                key={index}
-                href={method.href}
-                className="flex items-start gap-3 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-all duration-200 group"
-              >
-                <div className="flex-shrink-0 text-gray-600 dark:text-zinc-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                  {method.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    {method.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-zinc-500 mt-0.5">
-                    {method.description}
-                  </p>
-                  <p className="text-gray-900 dark:text-white font-medium mt-2">
-                    {method.value}
-                  </p>
-                </div>
-              </a>
+              <StaggerItem key={index}>
+                <motion.a
+                  href={method.href}
+                  whileHover={{ x: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-start gap-3 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-all duration-200 group"
+                >
+                  <div className="flex-shrink-0 text-gray-600 dark:text-zinc-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                    {method.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      {method.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-zinc-500 mt-0.5">
+                      {method.description}
+                    </p>
+                    <p className="text-gray-900 dark:text-white font-medium mt-2">
+                      {method.value}
+                    </p>
+                  </div>
+                </motion.a>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
 
           {/* Contact Form - Right Side */}
+          <ScrollReveal direction="right" delay={0.2}>
           <div>
             <div className="mb-6 gap-6">
               <h3 className="text-xl gap-2 font-semibold text-gray-900 dark:text-white mb-2">
@@ -293,10 +305,12 @@ const Contact = () => {
                 />
 
                 {/* Submit Button */}
-                <button
+                <motion.button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-3 rounded-lg font-semibold focus:ring-2 focus:ring-gray-900 dark:focus:ring-white focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800 dark:hover:bg-gray-100"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-3 rounded-lg font-semibold focus:ring-2 focus:ring-gray-900 dark:focus:ring-white focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800 dark:hover:bg-gray-100 flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center justify-center gap-2">
@@ -307,9 +321,12 @@ const Contact = () => {
                       <span>Sending...</span>
                     </div>
                   ) : (
-                    'Submit'
+                    <>
+                      <Send className="w-4 h-4" />
+                      Submit
+                    </>
                   )}
-                </button>
+                </motion.button>
 
                 {/* Status Messages */}
                 {submitStatus === 'success' && (
@@ -336,6 +353,7 @@ const Contact = () => {
               </form>
             </Form>
           </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>

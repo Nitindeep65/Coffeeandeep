@@ -3,9 +3,12 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { apiService } from '@/lib/api';
 import { Progress } from '@/components/ui/progress';
 import { CardContainer, CardBody, CardItem } from '@/components/ui/shadcn-io/3d-card';
+import { ScrollReveal, StaggerContainer, StaggerItem, ScaleReveal } from '@/components/motion-wrapper';
+import { ExternalLink, Github as GithubIcon, ArrowRight } from 'lucide-react';
 
 interface Project {
   _id?: string;
@@ -230,18 +233,23 @@ const Projects = () => {
   };
 
   return (
-    <section id="projects" className="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-zinc-900 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+    <section id="projects" className="relative py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-zinc-900 transition-colors duration-300 overflow-hidden">
+      {/* Background grid pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.015)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+      
+      <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            Featured Projects
-          </h2>
-          <p className="text-xl text-gray-600 dark:text-zinc-400 max-w-3xl mx-auto">
-            Explore my portfolio of web applications, showcasing expertise in modern technologies and problem-solving capabilities.
-          </p>
-        </div>
+        <ScrollReveal direction="up">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+              Featured Projects
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-zinc-400 max-w-3xl mx-auto">
+              Explore my portfolio of web applications, showcasing expertise in modern technologies and problem-solving capabilities.
+            </p>
+          </div>
+        </ScrollReveal>
 
         {/* Loading State */}
         {loading && (
@@ -284,8 +292,9 @@ const Projects = () => {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
-                {projects.slice(0, 3).map((project) => (
+              <StaggerContainer staggerDelay={0.15} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
+                {projects.slice(0, 3).map((project, index) => (
+                  <StaggerItem key={project._id || project.id}>
                   <CardContainer key={project._id || project.id} className="inter-var" containerClassName="py-0">
                     <CardBody className="bg-gray-50 dark:bg-zinc-900 relative group/card border dark:border-zinc-800 w-auto sm:w-[24rem] h-auto rounded-xl p-6">
                       <CardItem
@@ -387,25 +396,26 @@ const Projects = () => {
                       )}
                     </CardBody>
                   </CardContainer>
+                  </StaggerItem>
                 ))}
-              </div>
+              </StaggerContainer>
             )}
           </>
         )}
 
         {/* See More Projects Button */}
         {!loading && !error && projects.length >= 3 && (
-          <div className="text-center mb-8">
-            <Link
-              href="/projects"
-              className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-3 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-200"
-            >
-              <span>View All Projects</span>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </Link>
-          </div>
+          <ScrollReveal direction="up" delay={0.2}>
+            <div className="text-center mb-8">
+              <Link
+                href="/projects"
+                className="group inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-3 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-200"
+              >
+                <span>View All Projects</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+          </ScrollReveal>
         )}
 
         {/* Add More Projects Button - Only in Development */}

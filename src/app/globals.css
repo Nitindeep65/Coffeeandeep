@@ -40,7 +40,18 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Modern dark mode scrollbar */
+/* ─── Smooth scroll behavior ─── */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ─── Selection styling ─── */
+::selection {
+  background: rgba(59, 130, 246, 0.2);
+  color: inherit;
+}
+
+/* ─── Modern dark mode scrollbar ─── */
 @media (prefers-color-scheme: dark) {
   ::-webkit-scrollbar {
     width: 8px;
@@ -60,7 +71,12 @@ body {
   }
 }
 
-/* Hero profile section - side by side layout for 591px to 1022px */
+/* ─── Section transition dividers ─── */
+section {
+  position: relative;
+}
+
+/* ─── Hero profile section - side by side layout for 591px to 1022px ─── */
 @media (min-width: 591px) and (max-width: 1022px) {
   .hero-profile-section {
     flex-direction: row !important;
@@ -96,4 +112,11 @@ body {
   .hero-profile-text {
     text-align: center !important;
   }
+}
+
+/* ─── Focus-visible for accessibility ─── */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
 }

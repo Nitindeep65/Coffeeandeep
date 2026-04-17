@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { apiService } from '@/lib/api';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { ScrollReveal, StaggerContainer, StaggerItem, ScaleReveal } from '@/components/motion-wrapper';
 
 interface Blog {
   _id?: string;
@@ -371,19 +373,20 @@ const Blog = () => {
   };
 
   return (
-    <section id="blog" className="py-12 sm:py-16 lg:py-20 bg-white dark:bg-black transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+    <section id="blog" className="relative py-12 sm:py-16 lg:py-20 bg-white dark:bg-black transition-colors duration-300 overflow-hidden">
+      <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-12">
-          <div>
-            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-              Tech Insights
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-zinc-400 max-w-2xl">
-              Exploring cutting-edge technologies shaping tomorrow's digital landscape
-            </p>
-          </div>
+        <ScrollReveal direction="up">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-12">
+            <div>
+              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                Tech Insights
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-zinc-400 max-w-2xl">
+                Exploring cutting-edge technologies shaping tomorrow's digital landscape
+              </p>
+            </div>
           
           <div className="mt-6 sm:mt-0 flex items-center gap-4">
             {process.env.NODE_ENV === 'development' && (
@@ -403,13 +406,15 @@ const Blog = () => {
             </Link>
           </div>
         </div>
+        </ScrollReveal>
 
         {/* Blog Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           
           {/* Featured Blog - Left Side */}
           {featuredBlog && (
-            <div className="space-y-6">
+            <ScaleReveal>
+              <div className="space-y-6">
               <Link href={`/blogs/${featuredBlog.slug}`} className="block">
                 {/* Featured Image with Dotted Effect */}
                 <div className="aspect-[4/3] w-full">
@@ -464,13 +469,14 @@ const Blog = () => {
                   </button>
                 )}
               </div>
+            </ScaleReveal>
             )}
             
             {/* Secondary Blogs - Right Side */}
-            <div className="space-y-4">
+            <StaggerContainer staggerDelay={0.12} className="space-y-4">
               {secondaryBlogs.map((blog) => (
+                <StaggerItem key={blog._id}>
                 <Link
-                  key={blog._id}
                   href={`/blogs/${blog.slug}`}
                   className="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors duration-200 cursor-pointer group"
                 >
@@ -503,8 +509,9 @@ const Blog = () => {
                     </button>
                   )}
                 </Link>
+              </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
           </div>
 
         {/* Add Blog Form Modal - Only in Development */}

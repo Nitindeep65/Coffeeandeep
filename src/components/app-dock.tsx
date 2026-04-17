@@ -9,13 +9,17 @@ import {
   Github,
   Linkedin,
   Twitter,
+  BookOpen,
+  Sparkles,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Dock, DockIcon, DockItem, DockLabel } from '@/components/ui/shadcn-io/dock';
 
 const navigationItems = [
   { title: 'Home', url: '#home', icon: Home },
   { title: 'Projects', url: '#projects', icon: FolderKanban },
   { title: 'About', url: '#about', icon: User },
+  { title: 'Blog', url: '#blog', icon: BookOpen },
   { title: 'Contact', url: '#contact', icon: Mail },
 ];
 
@@ -28,23 +32,35 @@ const socialLinks = [
 export function AppDock() {
   const [activeSection, setActiveSection] = React.useState('home');
   const [isDesktop, setIsDesktop] = React.useState(false);
+  const [isVisible, setIsVisible] = React.useState(true);
+  const [lastScrollY, setLastScrollY] = React.useState(0);
 
   React.useEffect(() => {
-    // Set initial value
     setIsDesktop(window.innerWidth >= 768);
-
-    // Handle resize
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 768);
-    };
-
+    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Hide dock on rapid scroll down, show on scroll up
   React.useEffect(() => {
     const handleScroll = () => {
-      const sections = ['home', 'projects', 'about', 'contact'];
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 300) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const sections = ['home', 'projects', 'about', 'blog', 'contact'];
       const scrollPosition = window.scrollY + 200;
 
       for (const section of sections) {
@@ -82,54 +98,93 @@ export function AppDock() {
   };
 
   return (
-    <div className="fixed bottom-3 md:bottom-6 left-1/2 -translate-x-1/2 z-50 w-fit">
-      <Dock 
-        magnification={isDesktop ? 70 : 45} 
-        distance={isDesktop ? 140 : 80}
-        panelHeight={isDesktop ? 64 : 46}
-        className="shadow-xl border border-gray-200 dark:border-gray-700 px-1.5 md:px-4 gap-1 md:gap-3 bg-black dark:bg-white backdrop-blur-xl"
+    <AnimatePresence>
+      <motion.div
+        initial={{ y: 100, opacity: 0 }}
+        animate={{
+          y: isVisible ? 0 : 100,
+          opacity: isVisible ? 1 : 0,
+        }}
+        transition={{ duration: 0.4, ease: [0.25, 0.4, 0.25, 1] }}
+        className="fixed bottom-3 md:bottom-6 left-1/2 -translate-x-1/2 z-50 w-fit"
       >
-        {navigationItems.map((item) => {
-          const isActive = activeSection === item.url.replace('#', '');
-          return (
-            <DockItem key={item.title}>
-              <DockLabel className="text-xs">{item.title}</DockLabel>
+        {/* Ambient glow behind dock */}
+        <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-cyan-500/20 rounded-3xl blur-xl opacity-60 dark:opacity-40 pointer-events-none" />
+        
+        <Dock 
+          magnification={isDesktop ? 70 : 45} 
+          distance={isDesktop ? 140 : 80}
+          panelHeight={isDesktop ? 64 : 46}
+          className="relative shadow-2xl shadow-black/20 dark:shadow-black/50 border border-white/20 dark:border-white/10 px-1.5 md:px-4 gap-1 md:gap-3 bg-black/80 dark:bg-white/90 backdrop-blur-2xl rounded-2xl"
+        >
+          {navigationItems.map((item) => {
+            const isActive = activeSection === item.url.replace('#', '');
+            return (
+              <DockItem key={item.title}>
+                <DockLabel className="text-xs font-medium bg-black/90 dark:bg-white/95 text-white dark:text-black border-white/20 dark:border-black/10 shadow-xl backdrop-blur-md">
+                  {item.title}
+                </DockLabel>
+                <DockIcon>
+                  <a 
+                    href={item.url} 
+                    onClick={(e) => handleSmoothScroll(e, item.url)}
+                    className="relative flex items-center justify-center w-full h-full rounded-xl transition-all duration-300"
+                  >
+                    {/* Active indicator glow */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="dock-active-glow"
+                        className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg shadow-blue-500/30"
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    
+                    {/* Active dot indicator below icon */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="dock-active-dot"
+                        className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-blue-400 shadow-sm shadow-blue-400/50"
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    
+                    <item.icon 
+                      className={`relative z-10 w-4 h-4 md:w-5 md:h-5 transition-colors duration-300 ${
+                        isActive 
+                          ? 'text-white' 
+                          : 'text-white/70 dark:text-black/60 hover:text-white dark:hover:text-black'
+                      }`} 
+                    />
+                  </a>
+                </DockIcon>
+              </DockItem>
+            );
+          })}
+          
+          {/* Professional separator with gradient */}
+          <div className="relative w-px h-6 md:h-8 mx-0.5">
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/30 dark:via-black/20 to-transparent" />
+          </div>
+          
+          {socialLinks.map((link) => (
+            <DockItem key={link.title}>
+              <DockLabel className="text-xs font-medium bg-black/90 dark:bg-white/95 text-white dark:text-black border-white/20 dark:border-black/10 shadow-xl backdrop-blur-md">
+                {link.title}
+              </DockLabel>
               <DockIcon>
                 <a 
-                  href={item.url} 
-                  onClick={(e) => handleSmoothScroll(e, item.url)}
-                  className={`flex items-center justify-center w-full h-full rounded-md md:rounded-lg transition-colors ${
-                    isActive 
-                      ? 'bg-white dark:bg-black text-black dark:text-white' 
-                      : 'hover:bg-white/20 dark:hover:bg-black/20 text-white dark:text-black'
-                  }`}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-full h-full rounded-xl text-white/70 dark:text-black/60 hover:text-white dark:hover:text-black transition-all duration-300 hover:scale-110"
                 >
-                  <item.icon className="w-4 h-4 md:w-5 md:h-5" />
+                  <link.icon className="w-4 h-4 md:w-5 md:h-5" />
                 </a>
               </DockIcon>
             </DockItem>
-          );
-        })}
-        
-        {/* Separator */}
-        <div className="w-px h-6 md:h-8 bg-white/30 dark:bg-black/30" />
-        
-        {socialLinks.map((link) => (
-          <DockItem key={link.title}>
-            <DockLabel className="text-xs">{link.title}</DockLabel>
-            <DockIcon>
-              <a 
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center w-full h-full rounded-md md:rounded-lg hover:bg-white/20 dark:hover:bg-black/20 text-white dark:text-black transition-colors"
-              >
-                <link.icon className="w-4 h-4 md:w-5 md:h-5" />
-              </a>
-            </DockIcon>
-          </DockItem>
-        ))}
-      </Dock>
-    </div>
+          ))}
+        </Dock>
+      </motion.div>
+    </AnimatePresence>
   );
 }

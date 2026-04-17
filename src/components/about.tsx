@@ -1,9 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { apiService } from '@/lib/api';
 import { Progress } from '@/components/ui/progress';
 import { Terminal, AnimatedSpan, TypingAnimation } from '@/components/ui/shadcn-io/terminal';
+import { ScrollReveal, StaggerContainer, StaggerItem, AnimatedCounter, Parallax } from '@/components/motion-wrapper';
+import dynamic from 'next/dynamic';
+import { Briefcase, MapPin } from 'lucide-react';
+
+const SkillsChart = dynamic(() => import('@/components/skills-chart'), { ssr: false });
 
 interface Experience {
   _id?: string;
@@ -227,41 +233,49 @@ const About = () => {
   ];
 
   return (
-    <section id="about" className="py-12 sm:py-16 lg:py-20 bg-white dark:bg-black transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+    <section id="about" className="relative py-12 sm:py-16 lg:py-20 bg-white dark:bg-black transition-colors duration-300 overflow-hidden">
+      {/* Subtle background accent */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-blue-500/3 via-purple-500/3 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            Professional Background
-          </h2>
-          <p className="text-xl text-gray-600 dark:text-zinc-400 max-w-3xl mx-auto">
-            Software engineer with a proven track record of delivering scalable solutions and exceptional user experiences.
-          </p>
-        </div>
+        <ScrollReveal direction="up">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+              Professional Background
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-zinc-400 max-w-3xl mx-auto">
+              Software engineer with a proven track record of delivering scalable solutions and exceptional user experiences.
+            </p>
+          </div>
+        </ScrollReveal>
 
         {/* Work Experience Section */}
         <div className="mt-20">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-              Professional Experience
-            </h3>
-            
-            <div className="flex items-center gap-3">
-              {/* Add Experience Button - Only in Development */}
-              {process.env.NODE_ENV === 'development' && (
-                <button
-                  onClick={() => setShowAddExperienceForm(true)}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
-                >
-                  + Add
+          <ScrollReveal direction="left">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                <Briefcase className="w-6 h-6 text-blue-500" />
+                Professional Experience
+              </h3>
+              
+              <div className="flex items-center gap-3">
+                {/* Add Experience Button - Only in Development */}
+                {process.env.NODE_ENV === 'development' && (
+                  <button
+                    onClick={() => setShowAddExperienceForm(true)}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
+                  >
+                    + Add
+                  </button>
+                )}
+                <button className="text-gray-900 dark:text-white border border-gray-300 dark:border-zinc-700 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-900 transition-all duration-200 text-sm font-medium">
+                  View all
                 </button>
-              )}
-              <button className="text-gray-900 dark:text-white border border-gray-300 dark:border-zinc-700 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-900 transition-all duration-200 text-sm font-medium">
-                View all
-              </button>
+              </div>
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* Experience List */}
           {loading ? (
@@ -288,10 +302,13 @@ const About = () => {
               )}
             </div>
           ) : (
-            <div className="space-y-2">
+            <StaggerContainer staggerDelay={0.1} className="space-y-2">
               {experiences.map((experience) => (
-                <div 
+                <StaggerItem key={`stagger-${experience._id || experience.id}`}>
+                <motion.div 
                   key={experience._id || experience.id}
+                  whileHover={{ x: 4, backgroundColor: 'rgba(0,0,0,0.02)' }}
+                  transition={{ duration: 0.2 }}
                   className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors duration-200 group"
                 >
                   {/* Avatar */}
@@ -362,9 +379,10 @@ const About = () => {
                       </button>
                     </div>
                   )}
-                </div>
+                </motion.div>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
           )}
         </div>
 
@@ -372,48 +390,40 @@ const About = () => {
           
           {/* Left Side - Story & Description */}
           <div className="space-y-6 sm:space-y-8">
-            <div className="space-y-4 sm:space-y-6">
-              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-                Technical Expertise
-              </h3>
-              
-              <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700 dark:text-zinc-300 leading-relaxed">
-                <p>
-                  Full-stack software engineer with 1.5+ years of professional experience building 
-                  scalable web applications. Specialized in modern JavaScript frameworks including React, 
-                  Next.js, and Node.js, with strong expertise in TypeScript and database design.
-                </p>
-                
-                <p>
-                  Focused on delivering high-quality code through test-driven development, implementing 
-                  best practices for performance optimization, and creating responsive user interfaces 
-                  that enhance user engagement and satisfaction.
-                </p>
-                
-                <p>
-                  Experienced in cloud technologies, containerization with Docker, and CI/CD pipelines. 
-                  Committed to staying current with industry trends and continuously expanding technical 
-                  skills to deliver innovative solutions.
-                </p>
+            <ScrollReveal direction="left">
+              <div className="space-y-4 sm:space-y-6 lg:mb-8">
+                <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
+                  Technical Proficiency
+                </h3>
               </div>
-            </div>
+            </ScrollReveal>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:gap-6">
+            {/* Stats with animated counters */}
+            <StaggerContainer staggerDelay={0.15} className="grid grid-cols-3 gap-2 sm:gap-3 lg:gap-6">
               {stats.map((stat, index) => (
-                <div key={index} className="text-center p-2 sm:p-3 lg:p-6 bg-white dark:bg-zinc-900 rounded-lg sm:rounded-xl border dark:border-zinc-800 shadow-sm">
-                  <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-0.5 sm:mb-1 lg:mb-2">
-                    {stat.number}
-                  </div>
-                  <div className="text-gray-600 dark:text-zinc-400 text-[9px] sm:text-xs lg:text-sm font-medium leading-tight">
-                    {stat.label}
-                  </div>
-                </div>
+                <StaggerItem key={index}>
+                  <motion.div
+                    whileHover={{ y: -4, boxShadow: '0 8px 30px rgba(0,0,0,0.08)' }}
+                    transition={{ duration: 0.2 }}
+                    className="text-center p-2 sm:p-3 lg:p-6 bg-white dark:bg-zinc-900 rounded-lg sm:rounded-xl border dark:border-zinc-800 shadow-sm"
+                  >
+                    <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-0.5 sm:mb-1 lg:mb-2">
+                      <AnimatedCounter value={stat.number} />
+                    </div>
+                    <div className="text-gray-600 dark:text-zinc-400 text-[9px] sm:text-xs lg:text-sm font-medium leading-tight">
+                      {stat.label}
+                    </div>
+                  </motion.div>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
+
+            {/* Recharts Skills Radar */}
+            <SkillsChart />
           </div>
 
           {/* Right Side - Skills */}
+          <ScrollReveal direction="right" delay={0.2}>
           <div className="space-y-4 sm:space-y-6 lg:space-y-8">
             <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
               Skills & Technologies
@@ -477,6 +487,7 @@ const About = () => {
               </AnimatedSpan>
             </Terminal>
           </div>
+          </ScrollReveal>
         </div>
 
         {/* Add Experience Form Modal - Only in Development */}

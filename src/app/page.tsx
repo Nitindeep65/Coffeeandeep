@@ -12,7 +12,7 @@ export default function Home() {
         <Hero />
         <Projects />
         <About />
-         <Blog />
+        <Blog />
         <Contact />
       </main>
       <AppDock />
