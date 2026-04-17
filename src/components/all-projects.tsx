@@ -20,15 +20,22 @@ interface Project {
   order: number;
 }
 
-const AllProjects = () => {
+interface AllProjectsProps {
+  initialProjects?: Project[];
+}
+
+const AllProjects = ({ initialProjects = [] }: AllProjectsProps) => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Use server-fetched data as initial state — no loading delay!
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [loading, setLoading] = useState(initialProjects.length === 0);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch projects from API
+  // Only fetch client-side if no initial data was provided (fallback)
   useEffect(() => {
+    if (initialProjects.length > 0) return; // Already have server data, skip
+
     const fetchProjects = async () => {
       try {
         setLoading(true);
@@ -44,7 +51,7 @@ const AllProjects = () => {
     };
 
     fetchProjects();
-  }, []);
+  }, [initialProjects.length]);
 
   const [newProject, setNewProject] = useState({
     title: '',

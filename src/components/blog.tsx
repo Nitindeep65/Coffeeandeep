@@ -284,8 +284,15 @@ const DottedThumbnail = ({ src, alt }: { src: string; alt: string }) => {
   );
 };
 
-const Blog = () => {
-  const [blogs, setBlogs] = useState<Blog[]>(defaultBlogs);
+interface BlogProps {
+  initialBlogs?: Blog[];
+}
+
+const BlogComponent = ({ initialBlogs = [] }: BlogProps) => {
+  // Use server-fetched data if available, otherwise fall back to defaults
+  const [blogs, setBlogs] = useState<Blog[]>(
+    initialBlogs.length > 0 ? initialBlogs : defaultBlogs
+  );
   const [showAddBlogForm, setShowAddBlogForm] = useState(false);
   const [newBlog, setNewBlog] = useState({
     title: '',
@@ -298,7 +305,10 @@ const Blog = () => {
     featured: false
   });
 
+  // Only fetch client-side if no initial data was provided (fallback)
   useEffect(() => {
+    if (initialBlogs.length > 0) return; // Already have server data, skip
+
     const fetchBlogs = async () => {
       try {
         const data = await apiService.getBlogs();
@@ -312,7 +322,7 @@ const Blog = () => {
     };
 
     fetchBlogs();
-  }, []);
+  }, [initialBlogs.length]);
 
   const featuredBlog = blogs.find(blog => blog.featured) || blogs[0];
   const secondaryBlogs = blogs.filter(blog => blog._id !== featuredBlog?._id).slice(0, 4);
@@ -689,4 +699,4 @@ const Blog = () => {
   );
 };
 
-export default Blog;
+export default BlogComponent;

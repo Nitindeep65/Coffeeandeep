@@ -12,7 +12,11 @@ export async function GET() {
       .sort({ publishedAt: -1 })
       .lean();
     
-    return NextResponse.json(blogs);
+    return NextResponse.json(blogs, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+      },
+    });
   } catch (error) {
     console.error('Error fetching blogs:', error);
     return NextResponse.json(

@@ -129,10 +129,20 @@ const DottedImage = () => {
   );
 };
 
-const BlogList = () => {
-  const [blogs, setBlogs] = useState<Blog[]>(defaultBlogs);
+interface BlogListProps {
+  initialBlogs?: Blog[];
+}
 
+const BlogList = ({ initialBlogs = [] }: BlogListProps) => {
+  // Use server-fetched data if available, otherwise fall back to defaults
+  const [blogs, setBlogs] = useState<Blog[]>(
+    initialBlogs.length > 0 ? initialBlogs : defaultBlogs
+  );
+
+  // Only fetch client-side if no initial data was provided (fallback)
   useEffect(() => {
+    if (initialBlogs.length > 0) return; // Already have server data, skip
+
     const fetchBlogs = async () => {
       try {
         const data = await apiService.getBlogs();
@@ -146,7 +156,7 @@ const BlogList = () => {
     };
 
     fetchBlogs();
-  }, []);
+  }, [initialBlogs.length]);
 
   const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString('en-US', {
